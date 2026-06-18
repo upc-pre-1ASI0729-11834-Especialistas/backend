@@ -21,7 +21,7 @@ import java.util.List;
 public class Alert extends AuditableAbstractAggregateRoot<Alert> {
 
     @ManyToOne
-    @JoinColumn(name = "laboratory_id", nullable = false)
+    @JoinColumn(name = "laboratory_id", nullable = true)
     private Laboratory laboratory;
 
     private String title;
@@ -40,4 +40,25 @@ public class Alert extends AuditableAbstractAggregateRoot<Alert> {
 
     @OneToMany(mappedBy = "alert", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<AlertMetric> metrics = new ArrayList<>();
+
+    public Alert(com.test.backend.alerts.domain.model.commands.CreateAlertCommand command, Laboratory laboratory) {
+        this.laboratory = laboratory;
+        this.title = command.title();
+        this.description = command.description();
+        this.severity = command.severity();
+        this.status = command.status();
+        this.labName = command.labName();
+        this.timeAgo = command.timeAgo();
+    }
+
+    public Alert updateFrom(com.test.backend.alerts.domain.model.commands.UpdateAlertCommand command, Laboratory laboratory) {
+        this.laboratory = laboratory;
+        this.title = command.title();
+        this.description = command.description();
+        this.severity = command.severity();
+        this.status = command.status();
+        this.labName = command.labName();
+        this.timeAgo = command.timeAgo();
+        return this;
+    }
 }

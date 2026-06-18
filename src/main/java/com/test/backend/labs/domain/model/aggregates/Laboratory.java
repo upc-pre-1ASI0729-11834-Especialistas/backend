@@ -84,4 +84,46 @@ public class Laboratory extends AuditableAbstractAggregateRoot<Laboratory> {
 
     @OneToMany(mappedBy = "laboratory", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<StorageUnit> storageUnits = new ArrayList<>();
+
+    public Laboratory(com.test.backend.labs.domain.model.commands.CreateLaboratoryCommand command) {
+        this.name = command.name();
+        this.type = command.type();
+        this.status = command.status();
+        this.building = command.building();
+        this.floor = command.floor();
+        this.labCode = command.labCode();
+        this.roomNumber = command.roomNumber();
+        this.description = command.description();
+        this.overallStatus = command.overallStatus();
+        this.active = command.active();
+        this.isLive = command.isLive();
+        this.nextMaintenance = command.nextMaintenance();
+        this.maintenanceDaysLeft = command.maintenanceDaysLeft();
+        this.sensorConfig = command.sensorConfig();
+        this.safetyThresholds = command.safetyThresholds();
+        this.notificationPreferences = command.notificationPreferences();
+        this.lastUpdate = new java.util.Date();
+    }
+
+    public Laboratory updateFrom(com.test.backend.labs.domain.model.commands.UpdateLaboratoryCommand command) {
+        this.name = command.name();
+        this.type = command.type();
+        this.status = command.status();
+        this.building = command.building();
+        this.floor = command.floor();
+        this.labCode = command.labCode();
+        this.roomNumber = command.roomNumber();
+        this.description = command.description();
+        this.overallStatus = command.overallStatus();
+        this.active = command.active();
+        this.isLive = command.isLive();
+        this.nextMaintenance = command.nextMaintenance();
+        this.maintenanceDaysLeft = command.maintenanceDaysLeft();
+        this.sensorConfig = command.sensorConfig();
+        this.safetyThresholds = command.safetyThresholds();
+        this.notificationPreferences = command.notificationPreferences();
+        this.lastUpdate = new java.util.Date();
+        return this;
+    }
 }
+

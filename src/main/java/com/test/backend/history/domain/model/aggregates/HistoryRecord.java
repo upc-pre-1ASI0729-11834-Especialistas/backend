@@ -19,7 +19,7 @@ import java.util.Date;
 public class HistoryRecord extends AuditableAbstractAggregateRoot<HistoryRecord> {
 
     @ManyToOne
-    @JoinColumn(name = "laboratory_id", nullable = false)
+    @JoinColumn(name = "laboratory_id", nullable = true)
     private Laboratory laboratory;
 
     private String name;
@@ -36,4 +36,25 @@ public class HistoryRecord extends AuditableAbstractAggregateRoot<HistoryRecord>
     private String severity;
 
     private String status;
+
+    public HistoryRecord(com.test.backend.history.domain.model.commands.CreateHistoryRecordCommand command, Laboratory laboratory) {
+        this.laboratory = laboratory;
+        this.name = command.name();
+        this.description = command.description();
+        this.occurredAt = command.occurredAt();
+        this.eventType = command.eventType();
+        this.severity = command.severity();
+        this.status = command.status();
+    }
+
+    public HistoryRecord updateFrom(com.test.backend.history.domain.model.commands.UpdateHistoryRecordCommand command, Laboratory laboratory) {
+        this.laboratory = laboratory;
+        this.name = command.name();
+        this.description = command.description();
+        this.occurredAt = command.occurredAt();
+        this.eventType = command.eventType();
+        this.severity = command.severity();
+        this.status = command.status();
+        return this;
+    }
 }

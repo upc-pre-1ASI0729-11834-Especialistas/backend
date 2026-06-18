@@ -59,4 +59,37 @@ public class AutomationRule extends AuditableAbstractAggregateRoot<AutomationRul
 
     @Column(name = "auto_resolve")
     private boolean autoResolve;
+
+    public AutomationRule(com.test.backend.automation.domain.model.commands.CreateAutomationRuleCommand command, Laboratory specificLab) {
+        this.name = command.name();
+        this.active = command.active();
+        this.lastTriggered = command.lastTriggered();
+        this.triggerMetric = command.triggerMetric();
+        this.triggerOperator = command.triggerOperator();
+        this.triggerValue = command.triggerValue();
+        this.triggerUnit = command.triggerUnit();
+        this.triggerDuration = command.triggerDuration();
+        this.scope = command.scope();
+        this.specificLab = specificLab;
+        this.actions = command.actions();
+        this.executionLimitMins = command.executionLimitMins();
+        this.autoResolve = command.autoResolve();
+    }
+
+    public AutomationRule updateFrom(com.test.backend.automation.domain.model.commands.UpdateAutomationRuleCommand command, Laboratory specificLab) {
+        this.name = command.name();
+        this.active = command.active();
+        this.lastTriggered = command.lastTriggered();
+        this.triggerMetric = command.triggerMetric();
+        this.triggerOperator = command.triggerOperator();
+        this.triggerValue = command.triggerValue();
+        this.triggerUnit = command.triggerUnit();
+        this.triggerDuration = command.triggerDuration();
+        this.scope = command.scope();
+        this.specificLab = specificLab;
+        this.actions = command.actions();
+        this.executionLimitMins = command.executionLimitMins();
+        this.autoResolve = command.autoResolve();
+        return this;
+    }
 }

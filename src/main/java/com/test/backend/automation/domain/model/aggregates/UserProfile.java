@@ -68,4 +68,20 @@ public class UserProfile extends AuditableAbstractAggregateRoot<UserProfile> {
 
     @OneToMany(mappedBy = "userProfile", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<LabUserAccess> labAccesses = new ArrayList<>();
+
+    public UserProfile updateFrom(com.test.backend.automation.domain.model.commands.UpdateUserProfileCommand command, Role role) {
+        this.fullName = command.fullName();
+        this.role = role;
+        this.email = command.email();
+        this.avatarUrl = command.avatarUrl();
+        this.phoneNumber = command.phoneNumber();
+        this.professionalTitle = command.professionalTitle();
+        this.employeeId = command.employeeId();
+        this.systemState = command.systemState();
+        this.accessTier = command.accessTier();
+        this.defaultStartShift = command.defaultStartShift();
+        this.shiftDuration = command.shiftDuration();
+        this.autoGenerateShiftReport = command.autoGenerateShiftReport();
+        return this;
+    }
 }

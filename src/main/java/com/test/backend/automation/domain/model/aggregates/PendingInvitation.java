@@ -28,4 +28,10 @@ public class PendingInvitation extends AuditableAbstractAggregateRoot<PendingInv
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "sent_at")
     private Date sentAt;
+
+    public PendingInvitation(com.test.backend.automation.domain.model.commands.CreatePendingInvitationCommand command, Role role) {
+        this.email = command.email();
+        this.role = role;
+        this.sentAt = new java.util.Date();
+    }
 }

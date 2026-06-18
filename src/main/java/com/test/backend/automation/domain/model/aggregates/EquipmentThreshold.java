@@ -40,4 +40,17 @@ public class EquipmentThreshold extends AuditableAbstractAggregateRoot<Equipment
     private Double currentValue;
 
     private String status;
+
+    public EquipmentThreshold updateFrom(com.test.backend.automation.domain.model.commands.UpdateEquipmentThresholdCommand command, Laboratory laboratory) {
+        this.laboratory = laboratory;
+        this.name = command.name();
+        this.icon = command.icon();
+        this.minThreshold = command.minThreshold();
+        this.maxThreshold = command.maxThreshold();
+        this.warningAt = command.warningAt();
+        this.unit = command.unit();
+        this.currentValue = command.currentValue();
+        this.status = command.status();
+        return this;
+    }
 }
