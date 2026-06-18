@@ -2,8 +2,6 @@ package com.test.backend.labs.interfaces.rest.transform;
 
 import com.test.backend.labs.domain.model.aggregates.Laboratory;
 import com.test.backend.labs.domain.model.valueobjets.NotificationPreferences;
-import com.test.backend.labs.domain.model.valueobjets.SafetyThresholds;
-import com.test.backend.labs.domain.model.valueobjets.SensorConfig;
 import com.test.backend.labs.interfaces.rest.resources.*;
 
 import java.util.ArrayList;
@@ -66,34 +64,21 @@ public class LaboratoryResourceFromEntityAssembler {
                 ))
                 .collect(Collectors.toList());
 
-        // Map SensorConfig
-        SensorConfigResource sensors = null;
-        SensorConfig sc = entity.getSensorConfig();
-        if (sc != null) {
-            sensors = new SensorConfigResource(
-                sc.isTemperature(),
-                sc.isAirQuality(),
-                sc.isAiDetection(),
-                sc.isVentilation(),
-                sc.isAirConditioning(),
-                sc.isVibration(),
-                sc.isLighting()
-            );
-        }
-
-        // Map SafetyThresholds
-        SafetyThresholdsResource thresholds = null;
-        SafetyThresholds st = entity.getSafetyThresholds();
-        if (st != null) {
-            thresholds = new SafetyThresholdsResource(
-                st.getTempMin(),
-                st.getTempMax(),
-                st.getMaxCo2Ppm(),
-                st.getGasSensitivity(),
-                st.getMaxVibration(),
-                st.getAlertEscalation()
-            );
-        }
+        // Map MetricSubscriptions
+        List<MetricSubscriptionResource> metricSubscriptions = entity.getMetricSubscriptions() == null ? new ArrayList<>() :
+            entity.getMetricSubscriptions().stream()
+                .map(sub -> new MetricSubscriptionResource(
+                    sub.getMetricType().getId(),
+                    sub.getMetricType().getKey(),
+                    sub.getMetricType().getDisplayName(),
+                    sub.getMetricType().getUnit(),
+                    sub.getMetricType().getIcon(),
+                    sub.getMetricType().getCategory(),
+                    sub.getMinThreshold(),
+                    sub.getMaxThreshold(),
+                    sub.isActive()
+                ))
+                .collect(Collectors.toList());
 
         // Map NotificationPreferences
         NotificationPreferencesResource notifications = null;
@@ -127,8 +112,7 @@ public class LaboratoryResourceFromEntityAssembler {
             alerts,
             activities,
             schedules,
-            sensors,
-            thresholds,
+            metricSubscriptions,
             notifications
         );
     }

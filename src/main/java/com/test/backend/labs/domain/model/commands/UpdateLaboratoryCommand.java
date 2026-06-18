@@ -1,8 +1,8 @@
 package com.test.backend.labs.domain.model.commands;
 
 import com.test.backend.labs.domain.model.valueobjets.NotificationPreferences;
-import com.test.backend.labs.domain.model.valueobjets.SafetyThresholds;
-import com.test.backend.labs.domain.model.valueobjets.SensorConfig;
+
+import java.util.List;
 
 public record UpdateLaboratoryCommand(
     Long id,
@@ -19,7 +19,12 @@ public record UpdateLaboratoryCommand(
     boolean isLive,
     java.time.LocalDate nextMaintenance,
     Integer maintenanceDaysLeft,
-    SensorConfig sensorConfig,
-    SafetyThresholds safetyThresholds,
+    List<MetricSubscriptionData> metricSubscriptions,
     NotificationPreferences notificationPreferences
-) {}
+) {
+    public record MetricSubscriptionData(
+        Long metricTypeId,
+        Double minThreshold,
+        Double maxThreshold
+    ) {}
+}

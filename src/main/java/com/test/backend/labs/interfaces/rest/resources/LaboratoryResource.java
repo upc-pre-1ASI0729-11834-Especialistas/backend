@@ -22,7 +22,6 @@ public record LaboratoryResource(
     List<LabAlertResource> recentAlerts,
     List<LabActivityResource> recentActivities,
     List<LabScheduleResource> schedules,
-    SensorConfigResource sensors,
-    SafetyThresholdsResource thresholds,
+    List<MetricSubscriptionResource> metricSubscriptions,
     NotificationPreferencesResource notifications
 ) {}

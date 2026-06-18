@@ -2,8 +2,6 @@ package com.test.backend.labs.domain.model.aggregates;
 
 import com.test.backend.labs.domain.model.entities.*;
 import com.test.backend.labs.domain.model.valueobjets.NotificationPreferences;
-import com.test.backend.labs.domain.model.valueobjets.SensorConfig;
-import com.test.backend.labs.domain.model.valueobjets.SafetyThresholds;
 import com.test.backend.shared.domain.model.aggregates.AuditableAbstractAggregateRoot;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -59,13 +57,10 @@ public class Laboratory extends AuditableAbstractAggregateRoot<Laboratory> {
     private Integer maintenanceDaysLeft;
 
     @Embedded
-    private SensorConfig sensorConfig;
-
-    @Embedded
-    private SafetyThresholds safetyThresholds;
-
-    @Embedded
     private NotificationPreferences notificationPreferences;
+
+    @OneToMany(mappedBy = "laboratory", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<LabMetricSubscription> metricSubscriptions = new ArrayList<>();
 
     @OneToMany(mappedBy = "laboratory", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<LabMetric> metrics = new ArrayList<>();
@@ -96,8 +91,6 @@ public class Laboratory extends AuditableAbstractAggregateRoot<Laboratory> {
         this.isLive = command.isLive();
         this.nextMaintenance = command.nextMaintenance();
         this.maintenanceDaysLeft = command.maintenanceDaysLeft();
-        this.sensorConfig = command.sensorConfig();
-        this.safetyThresholds = command.safetyThresholds();
         this.notificationPreferences = command.notificationPreferences();
         this.lastUpdate = java.time.LocalDateTime.now();
     }
@@ -116,11 +109,8 @@ public class Laboratory extends AuditableAbstractAggregateRoot<Laboratory> {
         this.isLive = command.isLive();
         this.nextMaintenance = command.nextMaintenance();
         this.maintenanceDaysLeft = command.maintenanceDaysLeft();
-        this.sensorConfig = command.sensorConfig();
-        this.safetyThresholds = command.safetyThresholds();
         this.notificationPreferences = command.notificationPreferences();
         this.lastUpdate = java.time.LocalDateTime.now();
         return this;
     }
 }
-
