@@ -4,7 +4,7 @@ import com.test.backend.iam.domain.model.commands.SeedRolesCommand;
 import com.test.backend.iam.domain.model.entities.Role;
 import com.test.backend.iam.domain.model.valueobjects.Roles;
 import com.test.backend.iam.domain.services.RoleCommandService;
-import com.test.backend.iam.infrastructure.persistence.jpa.repositories.RoleRepository;
+import com.test.backend.iam.infrastructure.persistence.jpa.repositories.IamRoleRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
@@ -12,9 +12,9 @@ import java.util.Arrays;
 @Service
 public class RoleCommandServiceImpl implements RoleCommandService {
 
-    private final RoleRepository roleRepository;
+    private final IamRoleRepository roleRepository;
 
-    public RoleCommandServiceImpl(RoleRepository roleRepository) {
+    public RoleCommandServiceImpl(IamRoleRepository roleRepository) {
         this.roleRepository = roleRepository;
     }
 

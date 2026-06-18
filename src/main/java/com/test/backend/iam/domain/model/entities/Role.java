@@ -10,7 +10,7 @@ import lombok.With;
 import java.util.List;
 import java.util.Set;
 
-@Entity
+@Entity(name = "IamRole")
 @Table(name = "iam_roles")
 @Data
 @NoArgsConstructor

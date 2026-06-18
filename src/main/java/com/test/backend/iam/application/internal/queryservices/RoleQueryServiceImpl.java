@@ -4,7 +4,7 @@ import com.test.backend.iam.domain.model.entities.Role;
 import com.test.backend.iam.domain.model.queries.GetAllRolesQuery;
 import com.test.backend.iam.domain.model.queries.GetRoleByNameQuery;
 import com.test.backend.iam.domain.services.RoleQueryService;
-import com.test.backend.iam.infrastructure.persistence.jpa.repositories.RoleRepository;
+import com.test.backend.iam.infrastructure.persistence.jpa.repositories.IamRoleRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -13,9 +13,9 @@ import java.util.Optional;
 @Service
 public class RoleQueryServiceImpl implements RoleQueryService {
 
-    private final RoleRepository roleRepository;
+    private final IamRoleRepository roleRepository;
 
-    public RoleQueryServiceImpl(RoleRepository roleRepository) {
+    public RoleQueryServiceImpl(IamRoleRepository roleRepository) {
         this.roleRepository = roleRepository;
     }
 

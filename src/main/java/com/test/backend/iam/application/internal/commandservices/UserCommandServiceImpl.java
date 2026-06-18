@@ -10,7 +10,7 @@ import com.test.backend.iam.domain.model.entities.Role;
 import com.test.backend.iam.domain.model.valueobjects.AuthenticatedUser;
 import com.test.backend.iam.domain.model.valueobjects.Roles;
 import com.test.backend.iam.domain.services.UserCommandService;
-import com.test.backend.iam.infrastructure.persistence.jpa.repositories.RoleRepository;
+import com.test.backend.iam.infrastructure.persistence.jpa.repositories.IamRoleRepository;
 import com.test.backend.iam.infrastructure.persistence.jpa.repositories.UserRepository;
 import org.springframework.stereotype.Service;
 
@@ -22,11 +22,11 @@ import java.util.Optional;
 public class UserCommandServiceImpl implements UserCommandService {
 
     private final UserRepository userRepository;
-    private final RoleRepository roleRepository;
+    private final IamRoleRepository roleRepository;
     private final HashingService hashingService;
     private final TokenService tokenService;
 
-    public UserCommandServiceImpl(UserRepository userRepository, RoleRepository roleRepository,
+    public UserCommandServiceImpl(UserRepository userRepository, IamRoleRepository roleRepository,
                                    HashingService hashingService, TokenService tokenService) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
