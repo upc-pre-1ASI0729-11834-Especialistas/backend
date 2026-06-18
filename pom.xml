@@ -76,6 +76,12 @@
 			<artifactId>pluralize</artifactId>
 			<version>1.0.0</version>
 		</dependency>
+		<!-- Annotation processor for ConfigurationProperties metadata -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-configuration-processor</artifactId>
+			<optional>true</optional>
+		</dependency>
 
 		<!-- Spring Security (preparado para IAM futuro) -->
 		<dependency>

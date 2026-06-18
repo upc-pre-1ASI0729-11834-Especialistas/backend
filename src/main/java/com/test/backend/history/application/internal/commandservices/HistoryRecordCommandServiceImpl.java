@@ -7,6 +7,7 @@ import com.test.backend.history.domain.model.commands.DeleteHistoryRecordCommand
 import com.test.backend.history.domain.services.HistoryRecordCommandService;
 import com.test.backend.history.infrastructure.persistence.jpa.repositories.HistoryRecordRepository;
 import com.test.backend.labs.domain.model.aggregates.Laboratory;
+import com.test.backend.labs.domain.model.entities.LabActivity;
 import com.test.backend.labs.infrastructure.persistence.jpa.repositories.LaboratoryRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,6 +32,38 @@ public class HistoryRecordCommandServiceImpl implements HistoryRecordCommandServ
         Laboratory laboratory = findLaboratoryByName(command.lab());
         var record = new HistoryRecord(command, laboratory);
         historyRecordRepository.save(record);
+
+        if (laboratory != null) {
+            LabActivity activity = new LabActivity();
+            activity.setLaboratory(laboratory);
+            
+            String title = "Activity Log";
+            String icon = "edit_note";
+            if (command.name() != null) {
+                if (command.name().startsWith("Incident log")) {
+                    title = "Incident log added";
+                    icon = "warning";
+                } else if (command.name().startsWith("Maintenance log")) {
+                    title = "Maintenance log added";
+                    icon = "build";
+                } else if (command.name().startsWith("Laboratory log")) {
+                    title = "Laboratory log added";
+                    icon = "edit_note";
+                } else {
+                    title = command.name().split(" - ")[0] + " added";
+                }
+            }
+            activity.setTitle(title);
+            activity.setDescription(command.description());
+            
+            String formattedTime = "Today, " + new java.text.SimpleDateFormat("h:mm a", java.util.Locale.ENGLISH).format(new java.util.Date());
+            activity.setTimestamp(formattedTime);
+            activity.setIcon(icon);
+
+            laboratory.getActivities().add(activity);
+            laboratoryRepository.save(laboratory);
+        }
+
         return Optional.of(record);
     }
 

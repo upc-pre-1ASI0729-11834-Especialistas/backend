@@ -64,13 +64,7 @@ public class TemperatureReadingController {
             resources.add(new TemperatureReadingResource(idCounter++, date, val1, val2));
         }
 
-        if (resources.isEmpty()) {
-            resources.add(new TemperatureReadingResource(1L, "2026-06-13", 21.5, 22.0));
-            resources.add(new TemperatureReadingResource(2L, "2026-06-14", 22.0, 22.5));
-            resources.add(new TemperatureReadingResource(3L, "2026-06-15", 21.8, 23.0));
-            resources.add(new TemperatureReadingResource(4L, "2026-06-16", 22.2, 22.8));
-            resources.add(new TemperatureReadingResource(5L, "2026-06-17", 22.5, 23.2));
-        }
+
 
         return ResponseEntity.ok(resources);
     }

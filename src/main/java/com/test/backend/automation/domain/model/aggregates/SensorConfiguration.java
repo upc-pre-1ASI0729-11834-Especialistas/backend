@@ -36,4 +36,31 @@ public class SensorConfiguration extends AuditableAbstractAggregateRoot<SensorCo
 
     @OneToMany(mappedBy = "sensorConfiguration", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CalibrationRecord> calibrationRecords = new ArrayList<>();
+
+    public SensorConfiguration(com.test.backend.automation.domain.model.commands.CreateSensorConfigurationCommand command) {
+        this.sensorName = command.sensorName();
+        this.type = command.type();
+        this.unit = command.unit();
+        this.isActive = command.isActive();
+        this.calibrationDate = null;
+    }
+
+    public SensorConfiguration updateFrom(com.test.backend.automation.domain.model.commands.UpdateSensorConfigurationCommand command) {
+        this.sensorName = command.sensorName();
+        this.type = command.type();
+        this.unit = command.unit();
+        this.isActive = command.isActive();
+        return this;
+    }
+
+    public SensorConfiguration calibrate(com.test.backend.automation.domain.model.commands.CalibrateSensorCommand command) {
+        CalibrationRecord record = new CalibrationRecord();
+        record.setSensorConfiguration(this);
+        record.setCertificateId(command.certificateId());
+        record.setExpirationDate(command.expirationDate());
+        record.setCalibratedAt(command.calibratedAt());
+        this.calibrationRecords.add(record);
+        this.calibrationDate = command.calibratedAt();
+        return this;
+    }
 }

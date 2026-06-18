@@ -83,7 +83,7 @@ public class TelemetryLaboratoryController {
     }
 
     private TelemetryLaboratoryResource toTelemetryResource(com.test.backend.labs.domain.model.aggregates.Laboratory lab) {
-        double temperature = 22.5;
+        Double temperature = null;
         if (lab.getMetrics() != null) {
             for (var m : lab.getMetrics()) {
                 if (m.getName().toLowerCase().contains("temp")) {
