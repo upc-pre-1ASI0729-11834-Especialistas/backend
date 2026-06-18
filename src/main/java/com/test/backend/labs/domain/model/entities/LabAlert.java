@@ -28,4 +28,7 @@ public class LabAlert extends AuditableModel {
     private String timeAgo;
 
     private String severity;
+
+    @Column(name = "alert_id")
+    private Long alertId;
 }

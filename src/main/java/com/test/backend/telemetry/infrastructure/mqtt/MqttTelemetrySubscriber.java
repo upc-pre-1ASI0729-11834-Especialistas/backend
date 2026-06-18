@@ -27,6 +27,15 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Map;
 import java.util.Optional;
+import java.util.List;
+import java.util.ArrayList;
+
+import com.test.backend.alerts.infrastructure.persistence.jpa.repositories.AlertRepository;
+import com.test.backend.alerts.domain.model.aggregates.Alert;
+import com.test.backend.alerts.domain.model.entities.AlertMetric;
+import com.test.backend.labs.domain.model.entities.LabAlert;
+import com.test.backend.automation.infrastructure.persistence.jpa.repositories.AutomationRuleRepository;
+import com.test.backend.automation.domain.model.aggregates.AutomationRule;
 
 @Service
 public class MqttTelemetrySubscriber implements MqttCallbackExtended {
@@ -40,6 +49,8 @@ public class MqttTelemetrySubscriber implements MqttCallbackExtended {
     private final LaboratoryRepository laboratoryRepository;
     private final SensorReadingRepository sensorReadingRepository;
     private final MetricTypeRepository metricTypeRepository;
+    private final AlertRepository alertRepository;
+    private final AutomationRuleRepository automationRuleRepository;
     private final ObjectMapper objectMapper;
     private final TransactionTemplate transactionTemplate;
 
@@ -50,6 +61,8 @@ public class MqttTelemetrySubscriber implements MqttCallbackExtended {
                                    LaboratoryRepository laboratoryRepository,
                                    SensorReadingRepository sensorReadingRepository,
                                    MetricTypeRepository metricTypeRepository,
+                                   AlertRepository alertRepository,
+                                   AutomationRuleRepository automationRuleRepository,
                                    PlatformTransactionManager transactionManager) {
         this.client = client;
         this.connectOptions = connectOptions;
@@ -58,6 +71,8 @@ public class MqttTelemetrySubscriber implements MqttCallbackExtended {
         this.laboratoryRepository = laboratoryRepository;
         this.sensorReadingRepository = sensorReadingRepository;
         this.metricTypeRepository = metricTypeRepository;
+        this.alertRepository = alertRepository;
+        this.automationRuleRepository = automationRuleRepository;
         this.objectMapper = new ObjectMapper();
         this.transactionTemplate = new TransactionTemplate(transactionManager);
     }
@@ -231,7 +246,7 @@ public class MqttTelemetrySubscriber implements MqttCallbackExtended {
             sensorReadingRepository.save(reading);
 
             // 2. Update real-time metrics for Dashboard display
-            updateRealTimeLabMetric(lab, metricType, val);
+            updateRealTimeLabMetric(lab, metricType, val, sensor);
         }
 
         // Update Sensor Configuration Connection Info
@@ -244,7 +259,7 @@ public class MqttTelemetrySubscriber implements MqttCallbackExtended {
      * Updates or creates a real-time LabMetric using data from the MetricType catalog.
      * No more contains()-based inference — icon, unit come from the catalog.
      */
-    private void updateRealTimeLabMetric(Laboratory lab, MetricType metricType, Double val) {
+    private void updateRealTimeLabMetric(Laboratory lab, MetricType metricType, Double val, SensorConfiguration sensor) {
         LabMetric metric = lab.getMetrics().stream()
                 .filter(m -> m.getName().equalsIgnoreCase(metricType.getKey()))
                 .findFirst()
@@ -259,7 +274,7 @@ public class MqttTelemetrySubscriber implements MqttCallbackExtended {
                 });
 
         metric.setValue(String.format("%.2f", val));
-        evaluateThresholds(lab, metricType, val, metric);
+        evaluateThresholds(lab, metricType, val, metric, sensor);
         laboratoryRepository.save(lab);
     }
 
@@ -267,7 +282,7 @@ public class MqttTelemetrySubscriber implements MqttCallbackExtended {
      * Evaluates thresholds using the LabMetricSubscription relationship.
      * No more contains()-based string matching — uses exact MetricType reference.
      */
-    private void evaluateThresholds(Laboratory lab, MetricType metricType, Double val, LabMetric metric) {
+    private void evaluateThresholds(Laboratory lab, MetricType metricType, Double val, LabMetric metric, SensorConfiguration sensor) {
         if (lab.getMetricSubscriptions() == null) return;
 
         Optional<LabMetricSubscription> subscriptionOpt = lab.getMetricSubscriptions().stream()
@@ -289,12 +304,142 @@ public class MqttTelemetrySubscriber implements MqttCallbackExtended {
             breached = true;
         }
 
+        boolean wasCritical = "CRITICAL".equalsIgnoreCase(metric.getStatus());
+
         if (breached) {
             metric.setStatus("CRITICAL");
             metric.setThreshold(subscription.getMaxThreshold() != null ? subscription.getMaxThreshold() : subscription.getMinThreshold());
             lab.setOverallStatus("CRITICAL");
+            lab.setStatus("Critical");
+
+            if (!wasCritical) {
+                // Generate a global Alert
+                Alert alert = new Alert();
+                alert.setLaboratory(lab);
+                alert.setSensorConfiguration(sensor);
+                alert.setTitle(metricType.getDisplayName() + " Threshold Exceeded");
+                alert.setDescription("Sensor " + sensor.getSensorName() + " detected a critical reading of " + String.format("%.2f", val) + metricType.getUnit() + " in " + lab.getName() + ".");
+                alert.setSeverity("CRITICAL");
+                alert.setStatus("ACTIVE");
+                alert.setLabName(lab.getName());
+                alert.setTimeAgo("Just now");
+
+                alert = alertRepository.save(alert);
+
+                // Populate Alert metrics
+                List<AlertMetric> alertMetrics = new java.util.ArrayList<>();
+                
+                AlertMetric currentValMetric = new AlertMetric();
+                currentValMetric.setAlert(alert);
+                currentValMetric.setLabel("currentValue");
+                currentValMetric.setValue(String.format("%.2f", val) + metricType.getUnit());
+                alertMetrics.add(currentValMetric);
+
+                AlertMetric thresholdMetric = new AlertMetric();
+                thresholdMetric.setAlert(alert);
+                thresholdMetric.setLabel("threshold");
+                double thresholdVal = subscription.getMaxThreshold() != null ? subscription.getMaxThreshold() : subscription.getMinThreshold();
+                thresholdMetric.setValue(String.format("%.2f", thresholdVal) + metricType.getUnit());
+                alertMetrics.add(thresholdMetric);
+
+                AlertMetric exceededMetric = new AlertMetric();
+                exceededMetric.setAlert(alert);
+                exceededMetric.setLabel("exceededBy");
+                double diff = Math.abs(val - thresholdVal);
+                exceededMetric.setValue("+" + String.format("%.2f", diff) + metricType.getUnit());
+                alertMetrics.add(exceededMetric);
+
+                AlertMetric sensorTypeMetric = new AlertMetric();
+                sensorTypeMetric.setAlert(alert);
+                sensorTypeMetric.setLabel("sensorType");
+                sensorTypeMetric.setValue(sensor.getType() != null ? sensor.getType() : "NTC Thermistor");
+                alertMetrics.add(sensorTypeMetric);
+
+                AlertMetric lastCalMetric = new AlertMetric();
+                lastCalMetric.setAlert(alert);
+                lastCalMetric.setLabel("lastCalibration");
+                lastCalMetric.setValue(sensor.getCalibrationDate() != null ? sensor.getCalibrationDate().toString() : "N/A");
+                alertMetrics.add(lastCalMetric);
+
+                AlertMetric signalMetric = new AlertMetric();
+                signalMetric.setAlert(alert);
+                signalMetric.setLabel("signalStrength");
+                signalMetric.setValue("98%");
+                alertMetrics.add(signalMetric);
+
+                AlertMetric statusMetric = new AlertMetric();
+                statusMetric.setAlert(alert);
+                statusMetric.setLabel("networkStatus");
+                statusMetric.setValue(sensor.getStatus() != null ? sensor.getStatus() : "ONLINE");
+                alertMetrics.add(statusMetric);
+
+                // Resolve matching automation rule from database
+                Optional<AutomationRule> triggeredRuleOpt = automationRuleRepository.findAll().stream()
+                        .filter(rule -> rule.isActive()
+                                && rule.getTriggerMetric() != null
+                                && rule.getTriggerMetric().equalsIgnoreCase(metricType.getKey())
+                                && ("all".equalsIgnoreCase(rule.getScope()) 
+                                    || ("specific".equalsIgnoreCase(rule.getScope()) 
+                                        && rule.getSpecificLab() != null 
+                                        && rule.getSpecificLab().getId().equals(lab.getId()))))
+                        .findFirst();
+
+                String ruleName = "None";
+                String ruleStatus = "Inactive";
+                String ruleDesc = "None";
+
+                if (triggeredRuleOpt.isPresent()) {
+                    AutomationRule triggeredRule = triggeredRuleOpt.get();
+                    triggeredRule.setLastTriggered(java.time.LocalDateTime.now());
+                    automationRuleRepository.save(triggeredRule);
+
+                    ruleName = triggeredRule.getName();
+                    ruleStatus = "Running";
+                    ruleDesc = triggeredRule.getActions() != null && !triggeredRule.getActions().isEmpty()
+                            ? String.join(", ", triggeredRule.getActions())
+                            : "No actions specified";
+                }
+
+                AlertMetric ruleNameMetric = new AlertMetric();
+                ruleNameMetric.setAlert(alert);
+                ruleNameMetric.setLabel("automationRuleName");
+                ruleNameMetric.setValue(ruleName);
+                alertMetrics.add(ruleNameMetric);
+
+                AlertMetric ruleStatusMetric = new AlertMetric();
+                ruleStatusMetric.setAlert(alert);
+                ruleStatusMetric.setLabel("automationRuleStatus");
+                ruleStatusMetric.setValue(ruleStatus);
+                alertMetrics.add(ruleStatusMetric);
+
+                AlertMetric ruleDescMetric = new AlertMetric();
+                ruleDescMetric.setAlert(alert);
+                ruleDescMetric.setLabel("automationRuleDesc");
+                ruleDescMetric.setValue(ruleDesc);
+                alertMetrics.add(ruleDescMetric);
+
+                alert.getMetrics().addAll(alertMetrics);
+                alertRepository.save(alert);
+
+                // Add to lab alerts
+                LabAlert labAlert = new LabAlert();
+                labAlert.setLaboratory(lab);
+                labAlert.setTitle(alert.getTitle());
+                labAlert.setSource("Sensor " + sensor.getSensorName());
+                labAlert.setSeverity("CRITICAL");
+                labAlert.setTimeAgo("Just now");
+                labAlert.setAlertId(alert.getId());
+                lab.getAlerts().add(0, labAlert);
+            }
         } else {
             metric.setStatus("NORMAL");
+            // Reset lab overall status if no other metrics are critical
+            boolean anyOtherCritical = lab.getMetrics().stream()
+                    .anyMatch(m -> "CRITICAL".equalsIgnoreCase(m.getStatus()) && !m.getName().equalsIgnoreCase(metricType.getKey()));
+            if (!anyOtherCritical) {
+                lab.setOverallStatus("OPERATIONAL");
+                lab.setStatus("Operational");
+            }
         }
     }
 

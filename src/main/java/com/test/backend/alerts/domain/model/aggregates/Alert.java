@@ -9,6 +9,8 @@ import lombok.Setter;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 
+import com.test.backend.automation.domain.model.aggregates.SensorConfiguration;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,6 +25,10 @@ public class Alert extends AuditableAbstractAggregateRoot<Alert> {
     @ManyToOne
     @JoinColumn(name = "laboratory_id", nullable = true)
     private Laboratory laboratory;
+
+    @ManyToOne
+    @JoinColumn(name = "sensor_configuration_id", nullable = true)
+    private SensorConfiguration sensorConfiguration;
 
     private String title;
 

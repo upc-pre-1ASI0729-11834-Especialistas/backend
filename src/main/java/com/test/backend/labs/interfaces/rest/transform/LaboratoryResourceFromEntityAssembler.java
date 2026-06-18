@@ -32,7 +32,7 @@ public class LaboratoryResourceFromEntityAssembler {
         List<LabAlertResource> alerts = entity.getAlerts() == null ? new ArrayList<>() :
             entity.getAlerts().stream()
                 .map(a -> new LabAlertResource(
-                    a.getId(),
+                    a.getAlertId() != null ? a.getAlertId() : a.getId(),
                     a.getTitle(),
                     a.getSource(),
                     a.getTimeAgo(),

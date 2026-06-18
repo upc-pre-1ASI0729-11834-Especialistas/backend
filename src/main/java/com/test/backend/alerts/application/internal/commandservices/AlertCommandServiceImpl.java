@@ -58,6 +58,22 @@ public class AlertCommandServiceImpl implements AlertCommandService {
 
         alert.updateFrom(command, laboratory);
         alertRepository.save(alert);
+
+        if (laboratory != null && "RESOLVED".equalsIgnoreCase(alert.getStatus())) {
+            boolean hasOtherActiveAlerts = alertRepository.findByLaboratoryId(laboratory.getId()).stream()
+                    .anyMatch(a -> !"RESOLVED".equalsIgnoreCase(a.getStatus()) && !a.getId().equals(alert.getId()));
+            if (!hasOtherActiveAlerts) {
+                laboratory.setOverallStatus("OPERATIONAL");
+                laboratory.setStatus("Operational");
+                if (laboratory.getMetrics() != null) {
+                    for (var metric : laboratory.getMetrics()) {
+                        metric.setStatus("NORMAL");
+                    }
+                }
+                laboratoryRepository.save(laboratory);
+            }
+        }
+
         return Optional.of(alert);
     }
 
