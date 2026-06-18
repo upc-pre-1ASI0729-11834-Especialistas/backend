@@ -20,10 +20,13 @@ public class UserProfileController {
 
     private final UserProfileRepository userProfileRepository;
     private final RoleRepository roleRepository;
+    private final com.test.backend.iam.infrastructure.persistence.jpa.repositories.UserRepository iamUserRepository;
 
-    public UserProfileController(UserProfileRepository userProfileRepository, RoleRepository roleRepository) {
+    public UserProfileController(UserProfileRepository userProfileRepository, RoleRepository roleRepository,
+                                 com.test.backend.iam.infrastructure.persistence.jpa.repositories.UserRepository iamUserRepository) {
         this.userProfileRepository = userProfileRepository;
         this.roleRepository = roleRepository;
+        this.iamUserRepository = iamUserRepository;
     }
 
     @GetMapping
@@ -67,8 +70,23 @@ public class UserProfileController {
                 resource.autoGenerateShiftReport()
         );
 
+        var oldEmail = profile.getEmail();
+        var newEmail = command.email();
+
+        if (newEmail != null && !newEmail.equals(oldEmail) && iamUserRepository.existsByEmail(newEmail)) {
+            return ResponseEntity.badRequest().build();
+        }
+
         profile.updateFrom(command, role);
         userProfileRepository.save(profile);
+
+        var iamUserOptional = iamUserRepository.findByEmail(oldEmail);
+        if (iamUserOptional.isPresent()) {
+            var iamUser = iamUserOptional.get();
+            if (newEmail != null) iamUser.setEmail(newEmail);
+            if (command.fullName() != null) iamUser.setFullName(command.fullName());
+            iamUserRepository.save(iamUser);
+        }
 
         return ResponseEntity.ok(toResource(profile));
     }
