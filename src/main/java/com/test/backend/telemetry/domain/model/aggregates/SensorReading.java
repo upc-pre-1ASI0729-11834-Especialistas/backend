@@ -26,8 +26,9 @@ public class SensorReading extends AuditableAbstractAggregateRoot<SensorReading>
     @JoinColumn(name = "laboratory_id", nullable = false)
     private Laboratory laboratory;
 
-    @Column(name = "metric_key", nullable = false)
-    private String metricKey;
+    @ManyToOne
+    @JoinColumn(name = "metric_type_id", nullable = false)
+    private MetricType metricType;
 
     @Column(name = "metric_value", nullable = false)
     private Double metricValue;
@@ -35,13 +36,18 @@ public class SensorReading extends AuditableAbstractAggregateRoot<SensorReading>
     @Column(name = "recorded_at", nullable = false)
     private java.time.LocalDateTime recordedAt;
 
-    // Getter de compatibilidad con código heredado que agrupa por fecha
+    // Compatibility getter: returns the metric key string from the catalog
+    public String getMetricKey() {
+        return metricType != null ? metricType.getKey() : null;
+    }
+
+    // Compatibility getter for legacy code that groups by date
     public String getDate() {
         if (this.recordedAt == null) return null;
         return this.recordedAt.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
     }
 
-    // Getter de compatibilidad con código heredado que lee el valor de temperatura
+    // Compatibility getter for legacy code that reads the metric value
     public Double getValue() {
         return this.metricValue;
     }

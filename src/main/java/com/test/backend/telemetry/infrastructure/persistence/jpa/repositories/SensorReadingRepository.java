@@ -9,4 +9,7 @@ import java.util.List;
 @Repository
 public interface SensorReadingRepository extends JpaRepository<SensorReading, Long> {
     List<SensorReading> findByLaboratoryId(Long laboratoryId);
+    List<SensorReading> findByMetricTypeKey(String metricKey);
+    List<SensorReading> findByMetricTypeId(Long metricTypeId);
+    List<SensorReading> findByLaboratoryIdAndMetricTypeKey(Long laboratoryId, String metricKey);
 }

@@ -5,8 +5,11 @@ import com.test.backend.automation.domain.model.aggregates.SensorConfiguration;
 import com.test.backend.automation.infrastructure.persistence.jpa.repositories.SensorConfigurationRepository;
 import com.test.backend.labs.domain.model.aggregates.Laboratory;
 import com.test.backend.labs.domain.model.entities.LabMetric;
+import com.test.backend.labs.domain.model.entities.LabMetricSubscription;
 import com.test.backend.labs.infrastructure.persistence.jpa.repositories.LaboratoryRepository;
+import com.test.backend.telemetry.domain.model.aggregates.MetricType;
 import com.test.backend.telemetry.domain.model.aggregates.SensorReading;
+import com.test.backend.telemetry.infrastructure.persistence.jpa.repositories.MetricTypeRepository;
 import com.test.backend.telemetry.infrastructure.persistence.jpa.repositories.SensorReadingRepository;
 import com.test.backend.shared.infrastructure.persistence.configuration.MqttProperties;
 import jakarta.annotation.PostConstruct;
@@ -15,6 +18,8 @@ import org.eclipse.paho.client.mqttv3.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
@@ -34,21 +39,27 @@ public class MqttTelemetrySubscriber implements MqttCallbackExtended {
     private final SensorConfigurationRepository sensorConfigurationRepository;
     private final LaboratoryRepository laboratoryRepository;
     private final SensorReadingRepository sensorReadingRepository;
+    private final MetricTypeRepository metricTypeRepository;
     private final ObjectMapper objectMapper;
+    private final TransactionTemplate transactionTemplate;
 
     public MqttTelemetrySubscriber(MqttClient client,
                                    MqttConnectOptions connectOptions,
                                    MqttProperties mqttProperties,
                                    SensorConfigurationRepository sensorConfigurationRepository,
                                    LaboratoryRepository laboratoryRepository,
-                                   SensorReadingRepository sensorReadingRepository) {
+                                   SensorReadingRepository sensorReadingRepository,
+                                   MetricTypeRepository metricTypeRepository,
+                                   PlatformTransactionManager transactionManager) {
         this.client = client;
         this.connectOptions = connectOptions;
         this.mqttProperties = mqttProperties;
         this.sensorConfigurationRepository = sensorConfigurationRepository;
         this.laboratoryRepository = laboratoryRepository;
         this.sensorReadingRepository = sensorReadingRepository;
+        this.metricTypeRepository = metricTypeRepository;
         this.objectMapper = new ObjectMapper();
+        this.transactionTemplate = new TransactionTemplate(transactionManager);
     }
 
     @PostConstruct
@@ -110,7 +121,7 @@ public class MqttTelemetrySubscriber implements MqttCallbackExtended {
     public void messageArrived(String topic, MqttMessage message) {
         String payload = new String(message.getPayload(), StandardCharsets.UTF_8);
         logger.debug("MQTT message arrived on topic: {}, payload: {}", topic, payload);
-        
+
         try {
             String[] segments = topic.split("/");
             if (segments.length < 3 || !"safelab".equalsIgnoreCase(segments[0])) {
@@ -120,22 +131,32 @@ public class MqttTelemetrySubscriber implements MqttCallbackExtended {
             String unit = segments[1];
             String type = segments[2];
 
-            Optional<SensorConfiguration> sensorOpt = sensorConfigurationRepository.findByUnit(unit);
-            if (sensorOpt.isEmpty()) {
-                logger.warn("Security warning: received message for unregistered sensor unit '{}' on topic '{}'", unit, topic);
-                return;
-            }
-
-            SensorConfiguration sensor = sensorOpt.get();
-
             if ("status".equalsIgnoreCase(type)) {
                 if ("OFFLINE".equalsIgnoreCase(payload)) {
-                    sensor.setStatus("OFFLINE");
-                    sensorConfigurationRepository.save(sensor);
-                    logger.info("Sensor unit '{}' is now OFFLINE (LWT).", unit);
+                    transactionTemplate.executeWithoutResult(status -> {
+                        Optional<SensorConfiguration> sensorOpt = sensorConfigurationRepository.findByUnit(unit);
+                        if (sensorOpt.isPresent()) {
+                            SensorConfiguration sensor = sensorOpt.get();
+                            sensor.setStatus("OFFLINE");
+                            sensorConfigurationRepository.save(sensor);
+                            logger.info("Sensor unit '{}' is now OFFLINE (LWT).", unit);
+                        }
+                    });
                 }
             } else if ("data".equalsIgnoreCase(type)) {
-                processTelemetryData(sensor, payload);
+                transactionTemplate.executeWithoutResult(status -> {
+                    try {
+                        Optional<SensorConfiguration> sensorOpt = sensorConfigurationRepository.findByUnit(unit);
+                        if (sensorOpt.isEmpty()) {
+                            logger.warn("Security warning: received message for unregistered sensor unit '{}' on topic '{}'", unit, topic);
+                            return;
+                        }
+                        SensorConfiguration sensor = sensorOpt.get();
+                        processTelemetryData(sensor, payload);
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                });
             }
         } catch (Exception e) {
             logger.error("Error processing MQTT message on topic: " + topic, e);
@@ -145,7 +166,7 @@ public class MqttTelemetrySubscriber implements MqttCallbackExtended {
     private void processTelemetryData(SensorConfiguration sensor, String payload) throws Exception {
         @SuppressWarnings("unchecked")
         Map<String, Object> data = objectMapper.readValue(payload, Map.class);
-        
+
         Long timestamp = null;
         if (data.containsKey("timestamp")) {
             Object tsObj = data.get("timestamp");
@@ -165,15 +186,15 @@ public class MqttTelemetrySubscriber implements MqttCallbackExtended {
             return;
         }
 
-        // Resolve Laboratory context: try explicitly linked laboratory first, then fallback to sensor name split
+        // Resolve Laboratory context
         Laboratory lab = sensor.getLaboratory();
         if (lab == null) {
             String name = sensor.getSensorName();
             String[] parts = name.split(" - ");
             String labName = parts.length > 1 ? parts[parts.length - 1].trim() : "";
-            
+
             Optional<Laboratory> labOpt = laboratoryRepository.findByName(labName);
-            lab = labOpt.orElseGet(() -> 
+            lab = labOpt.orElseGet(() ->
                 laboratoryRepository.findAll().stream().findFirst().orElse(null)
             );
         }
@@ -183,7 +204,7 @@ public class MqttTelemetrySubscriber implements MqttCallbackExtended {
             return;
         }
 
-        // Process each metric key-value pair
+        // Process each metric key-value pair using the MetricType catalog
         for (Map.Entry<String, Object> entry : metrics.entrySet()) {
             String key = entry.getKey();
             Double val = null;
@@ -192,17 +213,25 @@ public class MqttTelemetrySubscriber implements MqttCallbackExtended {
             }
             if (val == null) continue;
 
-            // 1. Save historical reading in EAV model
+            // Resolve MetricType from catalog — reject unknown keys
+            Optional<MetricType> metricTypeOpt = metricTypeRepository.findByKey(key);
+            if (metricTypeOpt.isEmpty()) {
+                logger.warn("Unknown metric key '{}' from sensor '{}' — ignoring. Register it in metric_types first.", key, sensor.getSensorName());
+                continue;
+            }
+            MetricType metricType = metricTypeOpt.get();
+
+            // 1. Save historical reading with FK to MetricType
             SensorReading reading = new SensorReading();
             reading.setSensorConfiguration(sensor);
             reading.setLaboratory(lab);
-            reading.setMetricKey(key);
+            reading.setMetricType(metricType);
             reading.setMetricValue(val);
             reading.setRecordedAt(recordedAt);
             sensorReadingRepository.save(reading);
 
             // 2. Update real-time metrics for Dashboard display
-            updateRealTimeLabMetric(lab, key, val);
+            updateRealTimeLabMetric(lab, metricType, val);
         }
 
         // Update Sensor Configuration Connection Info
@@ -211,72 +240,62 @@ public class MqttTelemetrySubscriber implements MqttCallbackExtended {
         sensorConfigurationRepository.save(sensor);
     }
 
-    private void updateRealTimeLabMetric(Laboratory lab, String key, Double val) {
-        // Find existing metric or create a new one
+    /**
+     * Updates or creates a real-time LabMetric using data from the MetricType catalog.
+     * No more contains()-based inference — icon, unit come from the catalog.
+     */
+    private void updateRealTimeLabMetric(Laboratory lab, MetricType metricType, Double val) {
         LabMetric metric = lab.getMetrics().stream()
-                .filter(m -> m.getName().equalsIgnoreCase(key))
+                .filter(m -> m.getName().equalsIgnoreCase(metricType.getKey()))
                 .findFirst()
                 .orElseGet(() -> {
                     LabMetric m = new LabMetric();
                     m.setLaboratory(lab);
-                    m.setName(key);
-                    m.setUnit(getUnitForMetric(key));
-                    m.setIcon(getIconForMetric(key));
+                    m.setName(metricType.getKey());
+                    m.setUnit(metricType.getUnit());
+                    m.setIcon(metricType.getIcon());
                     lab.getMetrics().add(m);
                     return m;
                 });
 
         metric.setValue(String.format("%.2f", val));
-        evaluateThresholds(lab, key, val, metric);
+        evaluateThresholds(lab, metricType, val, metric);
         laboratoryRepository.save(lab);
     }
 
-    private void evaluateThresholds(Laboratory lab, String key, Double val, LabMetric metric) {
-        var thresholds = lab.getSafetyThresholds();
-        if (thresholds == null) return;
+    /**
+     * Evaluates thresholds using the LabMetricSubscription relationship.
+     * No more contains()-based string matching — uses exact MetricType reference.
+     */
+    private void evaluateThresholds(Laboratory lab, MetricType metricType, Double val, LabMetric metric) {
+        if (lab.getMetricSubscriptions() == null) return;
 
-        if (key.toLowerCase().contains("temp")) {
-            if ((thresholds.getTempMin() != null && val < thresholds.getTempMin()) ||
-                (thresholds.getTempMax() != null && val > thresholds.getTempMax())) {
-                metric.setStatus("CRITICAL");
-                lab.setOverallStatus("CRITICAL");
-            } else {
-                metric.setStatus("NORMAL");
-            }
-        } else if (key.toLowerCase().contains("co2") || key.toLowerCase().contains("quality")) {
-            if (thresholds.getMaxCo2Ppm() != null && val > thresholds.getMaxCo2Ppm()) {
-                metric.setStatus("CRITICAL");
-                lab.setOverallStatus("CRITICAL");
-            } else {
-                metric.setStatus("NORMAL");
-            }
-        } else if (key.toLowerCase().contains("vibr")) {
-            if (thresholds.getMaxVibration() != null && val > thresholds.getMaxVibration()) {
-                metric.setStatus("CRITICAL");
-                lab.setOverallStatus("CRITICAL");
-            } else {
-                metric.setStatus("NORMAL");
-            }
+        Optional<LabMetricSubscription> subscriptionOpt = lab.getMetricSubscriptions().stream()
+                .filter(sub -> sub.getMetricType().getId().equals(metricType.getId()) && sub.isActive())
+                .findFirst();
+
+        if (subscriptionOpt.isEmpty()) {
+            metric.setStatus("NORMAL");
+            return;
         }
-    }
 
-    private String getUnitForMetric(String key) {
-        String k = key.toLowerCase();
-        if (k.contains("temp")) return "°C";
-        if (k.contains("humid")) return "%";
-        if (k.contains("co2")) return "ppm";
-        if (k.contains("press")) return "hPa";
-        if (k.contains("volt") || k.contains("power")) return "V";
-        return "";
-    }
+        LabMetricSubscription subscription = subscriptionOpt.get();
+        boolean breached = false;
 
-    private String getIconForMetric(String key) {
-        String k = key.toLowerCase();
-        if (k.contains("temp")) return "device_thermostat";
-        if (k.contains("humid")) return "water_drop";
-        if (k.contains("co2") || k.contains("air")) return "co2";
-        if (k.contains("press")) return "compress";
-        return "sensors";
+        if (subscription.getMinThreshold() != null && val < subscription.getMinThreshold()) {
+            breached = true;
+        }
+        if (subscription.getMaxThreshold() != null && val > subscription.getMaxThreshold()) {
+            breached = true;
+        }
+
+        if (breached) {
+            metric.setStatus("CRITICAL");
+            metric.setThreshold(subscription.getMaxThreshold() != null ? subscription.getMaxThreshold() : subscription.getMinThreshold());
+            lab.setOverallStatus("CRITICAL");
+        } else {
+            metric.setStatus("NORMAL");
+        }
     }
 
     @Override
