@@ -113,4 +113,9 @@ public class Laboratory extends AuditableAbstractAggregateRoot<Laboratory> {
         this.lastUpdate = java.time.LocalDateTime.now();
         return this;
     }
+
+    public Integer getMaintenanceDaysLeft() {
+        if (this.nextMaintenance == null) return null;
+        return (int) java.time.temporal.ChronoUnit.DAYS.between(java.time.LocalDate.now(), this.nextMaintenance);
+    }
 }

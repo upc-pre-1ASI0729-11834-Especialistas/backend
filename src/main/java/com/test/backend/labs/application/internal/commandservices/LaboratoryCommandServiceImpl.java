@@ -69,18 +69,36 @@ public class LaboratoryCommandServiceImpl implements LaboratoryCommandService {
 
         // Replace metric subscriptions
         if (command.metricSubscriptions() != null) {
-            laboratory.getMetricSubscriptions().clear();
-            for (var subData : command.metricSubscriptions()) {
-                var metricType = metricTypeRepository.findById(subData.metricTypeId())
-                    .orElseThrow(() -> new IllegalArgumentException("MetricType with id " + subData.metricTypeId() + " not found"));
+            var newSubIds = command.metricSubscriptions().stream()
+                .map(UpdateLaboratoryCommand.MetricSubscriptionData::metricTypeId)
+                .toList();
 
-                var subscription = new LabMetricSubscription();
-                subscription.setLaboratory(laboratory);
-                subscription.setMetricType(metricType);
-                subscription.setMinThreshold(subData.minThreshold());
-                subscription.setMaxThreshold(subData.maxThreshold());
-                subscription.setActive(true);
-                laboratory.getMetricSubscriptions().add(subscription);
+            // 1. Remove subscriptions no longer present in the command
+            laboratory.getMetricSubscriptions().removeIf(sub -> !newSubIds.contains(sub.getMetricType().getId()));
+
+            // 2. Add or update subscriptions
+            for (var subData : command.metricSubscriptions()) {
+                var existingOpt = laboratory.getMetricSubscriptions().stream()
+                    .filter(sub -> sub.getMetricType().getId().equals(subData.metricTypeId()))
+                    .findFirst();
+
+                if (existingOpt.isPresent()) {
+                    var existingSub = existingOpt.get();
+                    existingSub.setMinThreshold(subData.minThreshold());
+                    existingSub.setMaxThreshold(subData.maxThreshold());
+                    existingSub.setActive(true);
+                } else {
+                    var metricType = metricTypeRepository.findById(subData.metricTypeId())
+                        .orElseThrow(() -> new IllegalArgumentException("MetricType with id " + subData.metricTypeId() + " not found"));
+
+                    var subscription = new LabMetricSubscription();
+                    subscription.setLaboratory(laboratory);
+                    subscription.setMetricType(metricType);
+                    subscription.setMinThreshold(subData.minThreshold());
+                    subscription.setMaxThreshold(subData.maxThreshold());
+                    subscription.setActive(true);
+                    laboratory.getMetricSubscriptions().add(subscription);
+                }
             }
         }
 
