@@ -9,4 +9,5 @@ import java.util.Optional;
 @Repository
 public interface LaboratoryRepository extends JpaRepository<Laboratory, Long> {
     Optional<Laboratory> findByLabCode(String labCode);
+    Optional<Laboratory> findByName(String name);
 }

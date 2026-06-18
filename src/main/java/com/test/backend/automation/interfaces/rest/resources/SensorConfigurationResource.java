@@ -1,12 +1,14 @@
 package com.test.backend.automation.interfaces.rest.resources;
 
-import java.util.Date;
-
 public record SensorConfigurationResource(
     Long id,
     String sensorName,
     String type,
     String unit,
-    Date calibrationDate,
-    boolean isActive
+    java.time.LocalDate calibrationDate,
+    boolean isActive,
+    String status,
+    java.time.LocalDateTime lastConnected,
+    Long laboratoryId,
+    String laboratoryName
 ) {}

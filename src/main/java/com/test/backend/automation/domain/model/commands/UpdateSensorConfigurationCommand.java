@@ -5,5 +5,6 @@ public record UpdateSensorConfigurationCommand(
     String sensorName,
     String type,
     String unit,
-    boolean isActive
+    boolean isActive,
+    Long laboratoryId
 ) {}

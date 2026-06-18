@@ -8,7 +8,6 @@ import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 @Entity
@@ -19,26 +18,23 @@ import java.util.List;
 @Table(name = "compliance_reports")
 public class ComplianceReport extends AuditableAbstractAggregateRoot<ComplianceReport> {
 
-    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "period_start")
-    private Date periodStart;
+    private java.time.LocalDateTime periodStart;
 
-    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "period_end")
-    private Date periodEnd;
+    private java.time.LocalDateTime periodEnd;
 
     @Column(name = "digital_signature")
     private String digitalSignature;
 
-    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "generated_at")
-    private Date generatedAt;
+    private java.time.LocalDateTime generatedAt;
 
     @ManyToMany
     @JoinTable(
             name = "report_audit_links",
             joinColumns = @JoinColumn(name = "report_id"),
             inverseJoinColumns = @JoinColumn(name = "audit_id")
-    )
+            )
     private List<AuditTrail> auditTrails = new ArrayList<>();
 }

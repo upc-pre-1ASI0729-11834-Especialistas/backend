@@ -1,8 +1,9 @@
 package com.test.backend.telemetry.interfaces.rest.resources;
 
+import java.util.Map;
+
 public record TemperatureReadingResource(
     Long id,
     String date,
-    Double lab01Value,
-    Double lab02Value
+    Map<String, Double> values
 ) {}

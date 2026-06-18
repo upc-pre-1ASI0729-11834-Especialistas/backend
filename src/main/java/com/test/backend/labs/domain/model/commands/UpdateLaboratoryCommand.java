@@ -3,7 +3,6 @@ package com.test.backend.labs.domain.model.commands;
 import com.test.backend.labs.domain.model.valueobjets.NotificationPreferences;
 import com.test.backend.labs.domain.model.valueobjets.SafetyThresholds;
 import com.test.backend.labs.domain.model.valueobjets.SensorConfig;
-import java.util.Date;
 
 public record UpdateLaboratoryCommand(
     Long id,
@@ -18,7 +17,7 @@ public record UpdateLaboratoryCommand(
     String overallStatus,
     boolean active,
     boolean isLive,
-    Date nextMaintenance,
+    java.time.LocalDate nextMaintenance,
     Integer maintenanceDaysLeft,
     SensorConfig sensorConfig,
     SafetyThresholds safetyThresholds,

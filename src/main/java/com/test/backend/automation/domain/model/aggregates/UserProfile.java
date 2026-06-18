@@ -11,7 +11,6 @@ import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 @Entity
@@ -59,9 +58,8 @@ public class UserProfile extends AuditableAbstractAggregateRoot<UserProfile> {
     @Column(name = "auto_generate_shift_report")
     private boolean autoGenerateShiftReport;
 
-    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "last_login")
-    private Date lastLogin;
+    private java.time.LocalDateTime lastLogin;
 
     @OneToMany(mappedBy = "userProfile", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<NotificationPreference> notificationPreferences = new ArrayList<>();

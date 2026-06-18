@@ -1,9 +1,7 @@
 package com.test.backend.automation.interfaces.rest.resources;
 
-import java.util.Date;
-
 public record CalibrateSensorResource(
     String certificateId,
-    Date expirationDate,
-    Date calibratedAt
+    java.time.LocalDate expirationDate,
+    java.time.LocalDateTime calibratedAt
 ) {}

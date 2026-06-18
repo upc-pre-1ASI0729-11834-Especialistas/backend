@@ -34,13 +34,9 @@ public class TemperatureReadingController {
     @Operation(summary = "Get historical temperature readings")
     public ResponseEntity<List<TemperatureReadingResource>> getAllReadings() {
         var readings = sensorReadingQueryService.handle(new GetAllSensorReadingsQuery());
-        
-        List<Laboratory> labs = laboratoryRepository.findAll();
-        Long lab01Id = labs.size() > 0 ? labs.get(0).getId() : -1L;
-        Long lab02Id = labs.size() > 1 ? labs.get(1).getId() : -1L;
 
         Map<String, List<SensorReading>> grouped = readings.stream()
-                .filter(r -> r.getDate() != null && r.getLaboratory() != null)
+                .filter(r -> r.getDate() != null && r.getLaboratory() != null && r.getMetricKey() != null && r.getMetricKey().equalsIgnoreCase("temperature"))
                 .collect(Collectors.groupingBy(SensorReading::getDate));
 
         List<TemperatureReadingResource> resources = new ArrayList<>();
@@ -52,19 +48,14 @@ public class TemperatureReadingController {
 
         for (String date : sortedDates) {
             List<SensorReading> dateReadings = grouped.get(date);
-            Double val1 = 20.0;
-            Double val2 = 21.0;
+            Map<String, Double> values = new HashMap<>();
             for (var r : dateReadings) {
-                if (r.getLaboratory().getId().equals(lab01Id)) {
-                    val1 = r.getValue();
-                } else if (r.getLaboratory().getId().equals(lab02Id)) {
-                    val2 = r.getValue();
+                if (r.getLaboratory() != null) {
+                    values.put(r.getLaboratory().getId().toString(), r.getValue());
                 }
             }
-            resources.add(new TemperatureReadingResource(idCounter++, date, val1, val2));
+            resources.add(new TemperatureReadingResource(idCounter++, date, values));
         }
-
-
 
         return ResponseEntity.ok(resources);
     }

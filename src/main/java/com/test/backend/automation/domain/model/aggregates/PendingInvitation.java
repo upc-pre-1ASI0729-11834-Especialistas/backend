@@ -8,7 +8,7 @@ import lombok.Setter;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -25,13 +25,12 @@ public class PendingInvitation extends AuditableAbstractAggregateRoot<PendingInv
     @JoinColumn(name = "role_id", nullable = false)
     private Role role;
 
-    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "sent_at")
-    private Date sentAt;
+    private LocalDateTime sentAt;
 
     public PendingInvitation(com.test.backend.automation.domain.model.commands.CreatePendingInvitationCommand command, Role role) {
         this.email = command.email();
         this.role = role;
-        this.sentAt = new java.util.Date();
+        this.sentAt = java.time.LocalDateTime.now();
     }
 }

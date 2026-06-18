@@ -9,7 +9,6 @@ import lombok.Setter;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 
-import java.util.Date;
 import java.util.List;
 
 @Entity
@@ -25,9 +24,8 @@ public class AutomationRule extends AuditableAbstractAggregateRoot<AutomationRul
 
     private boolean active;
 
-    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "last_triggered")
-    private Date lastTriggered;
+    private java.time.LocalDateTime lastTriggered;
 
     @Column(name = "trigger_metric")
     private String triggerMetric;

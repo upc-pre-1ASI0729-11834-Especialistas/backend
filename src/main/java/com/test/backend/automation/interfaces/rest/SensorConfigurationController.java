@@ -7,6 +7,8 @@ import com.test.backend.automation.domain.model.aggregates.SensorConfiguration;
 import com.test.backend.automation.infrastructure.persistence.jpa.repositories.SensorConfigurationRepository;
 import com.test.backend.automation.interfaces.rest.resources.SensorConfigurationResource;
 import com.test.backend.automation.interfaces.rest.resources.CalibrateSensorResource;
+import com.test.backend.labs.domain.model.aggregates.Laboratory;
+import com.test.backend.labs.infrastructure.persistence.jpa.repositories.LaboratoryRepository;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
@@ -21,9 +23,12 @@ import java.util.List;
 public class SensorConfigurationController {
 
     private final SensorConfigurationRepository sensorConfigurationRepository;
+    private final LaboratoryRepository laboratoryRepository;
 
-    public SensorConfigurationController(SensorConfigurationRepository sensorConfigurationRepository) {
+    public SensorConfigurationController(SensorConfigurationRepository sensorConfigurationRepository,
+                                         LaboratoryRepository laboratoryRepository) {
         this.sensorConfigurationRepository = sensorConfigurationRepository;
+        this.laboratoryRepository = laboratoryRepository;
     }
 
     @GetMapping
@@ -39,13 +44,18 @@ public class SensorConfigurationController {
     @PostMapping
     @Operation(summary = "Create a new sensor configuration")
     public ResponseEntity<SensorConfigurationResource> createConfiguration(@RequestBody SensorConfigurationResource resource) {
+        Laboratory laboratory = null;
+        if (resource.laboratoryId() != null) {
+            laboratory = laboratoryRepository.findById(resource.laboratoryId()).orElse(null);
+        }
         var command = new CreateSensorConfigurationCommand(
                 resource.sensorName(),
                 resource.type(),
                 resource.unit(),
-                resource.isActive()
+                resource.isActive(),
+                resource.laboratoryId()
         );
-        var config = new SensorConfiguration(command);
+        var config = new SensorConfiguration(command, laboratory);
         sensorConfigurationRepository.save(config);
         return new ResponseEntity<>(toResource(config), HttpStatus.CREATED);
     }
@@ -57,14 +67,19 @@ public class SensorConfigurationController {
         if (result.isEmpty()) return ResponseEntity.notFound().build();
 
         var config = result.get();
+        Laboratory laboratory = config.getLaboratory();
+        if (resource.laboratoryId() != null) {
+            laboratory = laboratoryRepository.findById(resource.laboratoryId()).orElse(null);
+        }
         var command = new UpdateSensorConfigurationCommand(
                 id,
                 resource.sensorName() != null ? resource.sensorName() : config.getSensorName(),
                 resource.type() != null ? resource.type() : config.getType(),
                 resource.unit() != null ? resource.unit() : config.getUnit(),
-                resource.isActive()
+                resource.isActive(),
+                resource.laboratoryId() != null ? resource.laboratoryId() : (config.getLaboratory() != null ? config.getLaboratory().getId() : null)
         );
-        config.updateFrom(command);
+        config.updateFrom(command, laboratory);
         sensorConfigurationRepository.save(config);
         return ResponseEntity.ok(toResource(config));
     }
@@ -94,7 +109,11 @@ public class SensorConfigurationController {
                 config.getType(),
                 config.getUnit(),
                 config.getCalibrationDate(),
-                config.isActive()
+                config.isActive(),
+                config.getStatus(),
+                config.getLastConnected(),
+                config.getLaboratory() != null ? config.getLaboratory().getId() : null,
+                config.getLaboratory() != null ? config.getLaboratory().getName() : null
         );
     }
 }

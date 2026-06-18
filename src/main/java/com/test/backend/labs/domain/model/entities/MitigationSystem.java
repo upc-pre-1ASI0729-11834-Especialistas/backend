@@ -8,8 +8,6 @@ import lombok.Setter;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 
-import java.util.Date;
-
 @Entity
 @Getter
 @Setter
@@ -27,7 +25,6 @@ public class MitigationSystem extends AuditableModel {
     @Column(name = "is_active")
     private boolean isActive;
 
-    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "last_activated_at")
-    private Date lastActivatedAt;
+    private java.time.LocalDateTime lastActivatedAt;
 }

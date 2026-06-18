@@ -12,7 +12,6 @@ import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 @Entity
@@ -50,13 +49,11 @@ public class Laboratory extends AuditableAbstractAggregateRoot<Laboratory> {
     @Column(name = "is_live")
     private boolean isLive;
 
-    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "last_update")
-    private Date lastUpdate;
+    private java.time.LocalDateTime lastUpdate;
 
-    @Temporal(TemporalType.DATE)
     @Column(name = "next_maintenance")
-    private Date nextMaintenance;
+    private java.time.LocalDate nextMaintenance;
 
     @Column(name = "maintenance_days_left")
     private Integer maintenanceDaysLeft;
@@ -102,7 +99,7 @@ public class Laboratory extends AuditableAbstractAggregateRoot<Laboratory> {
         this.sensorConfig = command.sensorConfig();
         this.safetyThresholds = command.safetyThresholds();
         this.notificationPreferences = command.notificationPreferences();
-        this.lastUpdate = new java.util.Date();
+        this.lastUpdate = java.time.LocalDateTime.now();
     }
 
     public Laboratory updateFrom(com.test.backend.labs.domain.model.commands.UpdateLaboratoryCommand command) {
@@ -122,7 +119,7 @@ public class Laboratory extends AuditableAbstractAggregateRoot<Laboratory> {
         this.sensorConfig = command.sensorConfig();
         this.safetyThresholds = command.safetyThresholds();
         this.notificationPreferences = command.notificationPreferences();
-        this.lastUpdate = new java.util.Date();
+        this.lastUpdate = java.time.LocalDateTime.now();
         return this;
     }
 }

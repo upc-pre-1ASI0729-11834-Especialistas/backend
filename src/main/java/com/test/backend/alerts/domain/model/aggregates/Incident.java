@@ -9,8 +9,6 @@ import lombok.Setter;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 
-import java.util.Date;
-
 @Entity
 @Getter
 @Setter
@@ -25,13 +23,11 @@ public class Incident extends AuditableAbstractAggregateRoot<Incident> {
 
     private String status;
 
-    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "opened_at")
-    private Date openedAt;
+    private java.time.LocalDateTime openedAt;
 
-    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "resolved_at")
-    private Date resolvedAt;
+    private java.time.LocalDateTime resolvedAt;
 
     @Column(name = "escalation_max_mins")
     private Integer escalationMaxMins;

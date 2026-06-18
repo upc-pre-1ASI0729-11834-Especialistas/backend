@@ -6,8 +6,6 @@ import com.test.backend.labs.domain.model.valueobjets.SafetyThresholds;
 import com.test.backend.labs.domain.model.valueobjets.SensorConfig;
 import com.test.backend.labs.interfaces.rest.resources.UpdateLaboratoryResource;
 
-import java.util.Date;
-
 public class UpdateLaboratoryCommandFromResourceAssembler {
     public static UpdateLaboratoryCommand toCommandFromResource(Long id, UpdateLaboratoryResource resource) {
         if (resource == null) return null;
@@ -54,7 +52,7 @@ public class UpdateLaboratoryCommandFromResourceAssembler {
             resource.overallStatus() != null ? resource.overallStatus() : "OPERATIONAL",
             resource.active() != null ? resource.active() : true,
             resource.isLive() != null ? resource.isLive() : true,
-            resource.nextMaintenance() != null ? resource.nextMaintenance() : new Date(),
+            resource.nextMaintenance() != null ? resource.nextMaintenance() : java.time.LocalDate.now(),
             resource.maintenanceDaysLeft() != null ? resource.maintenanceDaysLeft() : 30,
             sensorConfig,
             safetyThresholds,

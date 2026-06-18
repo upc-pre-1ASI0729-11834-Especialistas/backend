@@ -35,3 +35,6 @@ build/
 .env
 .env.local
 .env.*.local
+
+# Spring Boot dev properties (credentials)
+src/main/resources/application-dev.properties

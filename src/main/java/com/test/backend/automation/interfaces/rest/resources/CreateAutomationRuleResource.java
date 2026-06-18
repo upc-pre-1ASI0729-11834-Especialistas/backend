@@ -1,12 +1,11 @@
 package com.test.backend.automation.interfaces.rest.resources;
 
-import java.util.Date;
 import java.util.List;
 
 public record CreateAutomationRuleResource(
     String name,
     Boolean active,
-    Date lastTriggered,
+    java.time.LocalDateTime lastTriggered,
     String triggerMetric,
     String triggerOperator,
     Double triggerValue,

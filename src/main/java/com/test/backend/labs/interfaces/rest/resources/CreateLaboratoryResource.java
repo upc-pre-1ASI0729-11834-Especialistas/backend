@@ -1,7 +1,5 @@
 package com.test.backend.labs.interfaces.rest.resources;
 
-import java.util.Date;
-
 public record CreateLaboratoryResource(
     String name,
     String type,
@@ -14,7 +12,7 @@ public record CreateLaboratoryResource(
     String overallStatus,
     Boolean active,
     Boolean isLive,
-    Date nextMaintenance,
+    java.time.LocalDate nextMaintenance,
     Integer maintenanceDaysLeft,
     SensorConfigResource sensors,
     SafetyThresholdsResource thresholds,

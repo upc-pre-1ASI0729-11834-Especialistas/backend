@@ -8,8 +8,6 @@ import lombok.Setter;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 
-import java.util.Date;
-
 @Entity
 @Getter
 @Setter
@@ -29,7 +27,6 @@ public class CorrectiveAction extends AuditableModel {
     @Column(name = "action_taken", columnDefinition = "TEXT")
     private String actionTaken;
 
-    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "performed_at")
-    private Date performedAt;
+    private java.time.LocalDateTime performedAt;
 }

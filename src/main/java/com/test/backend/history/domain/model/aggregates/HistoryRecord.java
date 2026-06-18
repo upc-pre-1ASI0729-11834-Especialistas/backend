@@ -8,8 +8,6 @@ import lombok.Setter;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 
-import java.util.Date;
-
 @Entity
 @Getter
 @Setter
@@ -26,9 +24,8 @@ public class HistoryRecord extends AuditableAbstractAggregateRoot<HistoryRecord>
 
     private String description;
 
-    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "occurred_at")
-    private Date occurredAt;
+    private java.time.LocalDateTime occurredAt;
 
     @Column(name = "event_type")
     private String eventType;

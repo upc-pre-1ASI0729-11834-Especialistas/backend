@@ -1,6 +1,5 @@
 package com.test.backend.labs.interfaces.rest.resources;
 
-import java.util.Date;
 import java.util.List;
 
 public record LaboratoryResource(
@@ -13,9 +12,9 @@ public record LaboratoryResource(
     String labCode,
     String overallStatus,
     boolean active,
-    Date lastUpdate,
+    java.time.LocalDateTime lastUpdate,
     boolean isLive,
-    Date nextMaintenance,
+    java.time.LocalDate nextMaintenance,
     Integer maintenanceDaysLeft,
     String roomNumber,
     String description,

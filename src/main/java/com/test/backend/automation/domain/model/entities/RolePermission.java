@@ -7,8 +7,6 @@ import lombok.Setter;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 
-import java.util.Date;
-
 @Entity
 @Getter
 @Setter
@@ -27,7 +25,6 @@ public class RolePermission extends AuditableModel {
     @Column(name = "is_granted")
     private boolean isGranted;
 
-    @Temporal(TemporalType.DATE)
     @Column(name = "last_audit_date")
-    private Date lastAuditDate;
+    private java.time.LocalDate lastAuditDate;
 }

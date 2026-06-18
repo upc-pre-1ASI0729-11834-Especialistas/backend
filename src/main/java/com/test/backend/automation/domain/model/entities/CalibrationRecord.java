@@ -8,7 +8,7 @@ import lombok.Setter;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 
-import java.util.Date;
+
 
 @Entity
 @Getter
@@ -25,11 +25,9 @@ public class CalibrationRecord extends AuditableModel {
     @Column(name = "certificate_id")
     private String certificateId;
 
-    @Temporal(TemporalType.DATE)
     @Column(name = "expiration_date")
-    private Date expirationDate;
+    private java.time.LocalDate expirationDate;
 
-    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "calibrated_at")
-    private Date calibratedAt;
+    private java.time.LocalDateTime calibratedAt;
 }

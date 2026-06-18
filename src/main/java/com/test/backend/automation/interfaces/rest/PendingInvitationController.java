@@ -12,7 +12,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Date;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Tag(name = "Pending Invitations", description = "Pending Invitations management API")
@@ -67,8 +68,7 @@ public class PendingInvitationController {
         
         String timeAgo = "Unknown";
         if (invitation.getSentAt() != null) {
-            long diffMs = new Date().getTime() - invitation.getSentAt().getTime();
-            long diffMins = diffMs / (60 * 1000);
+            long diffMins = Duration.between(invitation.getSentAt(), LocalDateTime.now()).toMinutes();
             if (diffMins < 1) {
                 timeAgo = "Just now";
             } else if (diffMins < 60) {

@@ -4,5 +4,6 @@ public record CreateSensorConfigurationCommand(
     String sensorName,
     String type,
     String unit,
-    boolean isActive
+    boolean isActive,
+    Long laboratoryId
 ) {}
