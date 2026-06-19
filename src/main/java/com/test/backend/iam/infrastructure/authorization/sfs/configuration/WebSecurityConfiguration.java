@@ -55,7 +55,7 @@ public class WebSecurityConfiguration {
             var cors = new CorsConfiguration();
             cors.setAllowedOriginPatterns(allowedOrigins);
             cors.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
-            cors.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-Requested-With", "Accept"));
+            cors.setAllowedHeaders(List.of("*"));
             cors.setAllowCredentials(true);
             return cors;
         }));
