@@ -56,6 +56,10 @@ public class Laboratory extends AuditableAbstractAggregateRoot<Laboratory> {
     @Column(name = "maintenance_days_left")
     private Integer maintenanceDaysLeft;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "workspace_id", nullable = false)
+    private Workspace workspace;
+
     @Embedded
     private NotificationPreferences notificationPreferences;
 

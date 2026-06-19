@@ -10,4 +10,6 @@ import java.util.Optional;
 public interface LaboratoryRepository extends JpaRepository<Laboratory, Long> {
     Optional<Laboratory> findByLabCode(String labCode);
     Optional<Laboratory> findByName(String name);
+    java.util.List<Laboratory> findByWorkspaceId(Long workspaceId);
+    Optional<Laboratory> findByIdAndWorkspaceId(Long id, Long workspaceId);
 }

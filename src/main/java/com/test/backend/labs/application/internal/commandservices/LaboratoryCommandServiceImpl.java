@@ -8,6 +8,8 @@ import com.test.backend.labs.domain.model.entities.LabMetricSubscription;
 import com.test.backend.labs.domain.services.LaboratoryCommandService;
 import com.test.backend.labs.infrastructure.persistence.jpa.repositories.LaboratoryRepository;
 import com.test.backend.telemetry.infrastructure.persistence.jpa.repositories.MetricTypeRepository;
+import com.test.backend.labs.infrastructure.persistence.jpa.repositories.WorkspaceRepository;
+import com.test.backend.shared.application.CurrentWorkspaceService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,11 +20,17 @@ public class LaboratoryCommandServiceImpl implements LaboratoryCommandService {
 
     private final LaboratoryRepository laboratoryRepository;
     private final MetricTypeRepository metricTypeRepository;
+    private final WorkspaceRepository workspaceRepository;
+    private final CurrentWorkspaceService currentWorkspaceService;
 
     public LaboratoryCommandServiceImpl(LaboratoryRepository laboratoryRepository,
-                                        MetricTypeRepository metricTypeRepository) {
+                                         MetricTypeRepository metricTypeRepository,
+                                         WorkspaceRepository workspaceRepository,
+                                         CurrentWorkspaceService currentWorkspaceService) {
         this.laboratoryRepository = laboratoryRepository;
         this.metricTypeRepository = metricTypeRepository;
+        this.workspaceRepository = workspaceRepository;
+        this.currentWorkspaceService = currentWorkspaceService;
     }
 
     @Override
@@ -31,7 +39,14 @@ public class LaboratoryCommandServiceImpl implements LaboratoryCommandService {
         if (laboratoryRepository.findByLabCode(command.labCode()).isPresent()) {
             throw new IllegalArgumentException("Laboratory with code " + command.labCode() + " already exists");
         }
+
+        Long workspaceId = currentWorkspaceService.getCurrentWorkspaceId()
+                .orElseThrow(() -> new IllegalStateException("User does not have an active workspace"));
+        var workspace = workspaceRepository.findById(workspaceId)
+                .orElseThrow(() -> new IllegalStateException("Workspace not found for ID: " + workspaceId));
+
         var laboratory = new Laboratory(command);
+        laboratory.setWorkspace(workspace);
 
         // Create metric subscriptions
         if (command.metricSubscriptions() != null) {
@@ -56,7 +71,10 @@ public class LaboratoryCommandServiceImpl implements LaboratoryCommandService {
     @Override
     @Transactional
     public Optional<Laboratory> handle(UpdateLaboratoryCommand command) {
-        var result = laboratoryRepository.findById(command.id());
+        Long workspaceId = currentWorkspaceService.getCurrentWorkspaceId()
+                .orElseThrow(() -> new IllegalStateException("User does not have an active workspace"));
+
+        var result = laboratoryRepository.findByIdAndWorkspaceId(command.id(), workspaceId);
         if (result.isEmpty()) return Optional.empty();
 
         var laboratory = result.get();
@@ -109,9 +127,12 @@ public class LaboratoryCommandServiceImpl implements LaboratoryCommandService {
     @Override
     @Transactional
     public void handle(DeleteLaboratoryCommand command) {
-        if (!laboratoryRepository.existsById(command.id())) {
-            throw new IllegalArgumentException("Laboratory not found");
-        }
-        laboratoryRepository.deleteById(command.id());
+        Long workspaceId = currentWorkspaceService.getCurrentWorkspaceId()
+                .orElseThrow(() -> new IllegalStateException("User does not have an active workspace"));
+
+        var laboratory = laboratoryRepository.findByIdAndWorkspaceId(command.id(), workspaceId)
+                .orElseThrow(() -> new IllegalArgumentException("Laboratory not found in this workspace"));
+
+        laboratoryRepository.delete(laboratory);
     }
 }
