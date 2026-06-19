@@ -9,4 +9,6 @@ import java.util.List;
 @Repository
 public interface HistoryRecordRepository extends JpaRepository<HistoryRecord, Long> {
     List<HistoryRecord> findByLaboratoryId(Long laboratoryId);
+    List<HistoryRecord> findByLaboratoryWorkspaceId(Long workspaceId);
+    java.util.Optional<HistoryRecord> findByIdAndLaboratoryWorkspaceId(Long id, Long workspaceId);
 }

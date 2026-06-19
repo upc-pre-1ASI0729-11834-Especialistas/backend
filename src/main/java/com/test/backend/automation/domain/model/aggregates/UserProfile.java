@@ -61,6 +61,9 @@ public class UserProfile extends AuditableAbstractAggregateRoot<UserProfile> {
     @Column(name = "last_login")
     private java.time.LocalDateTime lastLogin;
 
+    @Column(name = "workspace_id", nullable = false)
+    private Long workspaceId;
+
     @OneToMany(mappedBy = "userProfile", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<NotificationPreference> notificationPreferences = new ArrayList<>();
 

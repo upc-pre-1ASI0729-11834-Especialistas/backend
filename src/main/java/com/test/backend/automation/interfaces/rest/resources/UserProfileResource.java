@@ -13,5 +13,6 @@ public record UserProfileResource(
     String accessTier,
     String defaultStartShift,
     String shiftDuration,
-    boolean autoGenerateShiftReport
+    boolean autoGenerateShiftReport,
+    java.util.List<Long> laboratoryIds
 ) {}

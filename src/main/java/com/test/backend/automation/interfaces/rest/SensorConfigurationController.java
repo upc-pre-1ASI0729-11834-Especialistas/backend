@@ -9,6 +9,7 @@ import com.test.backend.automation.interfaces.rest.resources.SensorConfiguration
 import com.test.backend.automation.interfaces.rest.resources.CalibrateSensorResource;
 import com.test.backend.labs.domain.model.aggregates.Laboratory;
 import com.test.backend.labs.infrastructure.persistence.jpa.repositories.LaboratoryRepository;
+import com.test.backend.shared.application.CurrentWorkspaceService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
@@ -24,18 +25,39 @@ public class SensorConfigurationController {
 
     private final SensorConfigurationRepository sensorConfigurationRepository;
     private final LaboratoryRepository laboratoryRepository;
+    private final CurrentWorkspaceService currentWorkspaceService;
 
     public SensorConfigurationController(SensorConfigurationRepository sensorConfigurationRepository,
-                                         LaboratoryRepository laboratoryRepository) {
+                                         LaboratoryRepository laboratoryRepository,
+                                         CurrentWorkspaceService currentWorkspaceService) {
         this.sensorConfigurationRepository = sensorConfigurationRepository;
         this.laboratoryRepository = laboratoryRepository;
+        this.currentWorkspaceService = currentWorkspaceService;
     }
 
     @GetMapping
     @Operation(summary = "Get all sensor configurations")
     public ResponseEntity<List<SensorConfigurationResource>> getAllConfigurations() {
-        var configs = sensorConfigurationRepository.findAll();
+        var profileOpt = currentWorkspaceService.getCurrentUserProfile();
+        if (profileOpt.isEmpty()) {
+            return ResponseEntity.ok(List.of());
+        }
+        var profile = profileOpt.get();
+        var configs = sensorConfigurationRepository.findByLaboratoryWorkspaceId(profile.getWorkspaceId());
+
+        if (profile.getRole() != null && "Administrator".equalsIgnoreCase(profile.getRole().getName())) {
+            var resources = configs.stream()
+                    .map(this::toResource)
+                    .toList();
+            return ResponseEntity.ok(resources);
+        }
+
+        var allowedLabIds = profile.getLabAccesses().stream()
+                .map(access -> access.getLaboratory().getId())
+                .toList();
+
         var resources = configs.stream()
+                .filter(c -> c.getLaboratory() != null && allowedLabIds.contains(c.getLaboratory().getId()))
                 .map(this::toResource)
                 .toList();
         return ResponseEntity.ok(resources);
@@ -44,9 +66,17 @@ public class SensorConfigurationController {
     @PostMapping
     @Operation(summary = "Create a new sensor configuration")
     public ResponseEntity<SensorConfigurationResource> createConfiguration(@RequestBody SensorConfigurationResource resource) {
+        var workspaceIdOpt = currentWorkspaceService.getCurrentWorkspaceId();
+        if (workspaceIdOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
         Laboratory laboratory = null;
         if (resource.laboratoryId() != null) {
-            laboratory = laboratoryRepository.findById(resource.laboratoryId()).orElse(null);
+            laboratory = laboratoryRepository.findByIdAndWorkspaceId(resource.laboratoryId(), workspaceIdOpt.get()).orElse(null);
+            if (laboratory == null) {
+                return ResponseEntity.badRequest().build(); // Laboratory does not exist in user's workspace
+            }
         }
         var command = new CreateSensorConfigurationCommand(
                 resource.sensorName(),
@@ -63,13 +93,21 @@ public class SensorConfigurationController {
     @PutMapping("/{id}")
     @Operation(summary = "Update an existing sensor configuration")
     public ResponseEntity<SensorConfigurationResource> updateConfiguration(@PathVariable Long id, @RequestBody SensorConfigurationResource resource) {
-        var result = sensorConfigurationRepository.findById(id);
+        var workspaceIdOpt = currentWorkspaceService.getCurrentWorkspaceId();
+        if (workspaceIdOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+        var result = sensorConfigurationRepository.findByIdAndLaboratoryWorkspaceId(id, workspaceIdOpt.get());
         if (result.isEmpty()) return ResponseEntity.notFound().build();
 
         var config = result.get();
         Laboratory laboratory = config.getLaboratory();
         if (resource.laboratoryId() != null) {
-            laboratory = laboratoryRepository.findById(resource.laboratoryId()).orElse(null);
+            laboratory = laboratoryRepository.findByIdAndWorkspaceId(resource.laboratoryId(), workspaceIdOpt.get()).orElse(null);
+            if (laboratory == null) {
+                return ResponseEntity.badRequest().build();
+            }
         }
         var command = new UpdateSensorConfigurationCommand(
                 id,
@@ -87,7 +125,12 @@ public class SensorConfigurationController {
     @PostMapping("/{id}/calibrate")
     @Operation(summary = "Calibrate a sensor")
     public ResponseEntity<SensorConfigurationResource> calibrateSensor(@PathVariable Long id, @RequestBody CalibrateSensorResource resource) {
-        var result = sensorConfigurationRepository.findById(id);
+        var workspaceIdOpt = currentWorkspaceService.getCurrentWorkspaceId();
+        if (workspaceIdOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+        var result = sensorConfigurationRepository.findByIdAndLaboratoryWorkspaceId(id, workspaceIdOpt.get());
         if (result.isEmpty()) return ResponseEntity.notFound().build();
 
         var config = result.get();

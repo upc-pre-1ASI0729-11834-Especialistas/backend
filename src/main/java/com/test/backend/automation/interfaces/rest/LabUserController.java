@@ -2,7 +2,9 @@ package com.test.backend.automation.interfaces.rest;
 
 import com.test.backend.automation.domain.model.aggregates.UserProfile;
 import com.test.backend.automation.infrastructure.persistence.jpa.repositories.UserProfileRepository;
+import com.test.backend.automation.infrastructure.persistence.jpa.repositories.UserWorkspaceAccessRepository;
 import com.test.backend.automation.interfaces.rest.resources.LabUserResource;
+import com.test.backend.shared.application.CurrentWorkspaceService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
@@ -19,31 +21,42 @@ import java.util.stream.Collectors;
 public class LabUserController {
 
     private final UserProfileRepository userProfileRepository;
+    private final UserWorkspaceAccessRepository userWorkspaceAccessRepository;
+    private final CurrentWorkspaceService currentWorkspaceService;
 
-    public LabUserController(UserProfileRepository userProfileRepository) {
+    public LabUserController(UserProfileRepository userProfileRepository,
+                              UserWorkspaceAccessRepository userWorkspaceAccessRepository,
+                              CurrentWorkspaceService currentWorkspaceService) {
         this.userProfileRepository = userProfileRepository;
+        this.userWorkspaceAccessRepository = userWorkspaceAccessRepository;
+        this.currentWorkspaceService = currentWorkspaceService;
     }
 
     @GetMapping
     @Operation(summary = "Get all lab users (denormalized view)")
     public ResponseEntity<List<LabUserResource>> getAllLabUsers() {
-        var profiles = userProfileRepository.findAll();
-        var resources = profiles.stream()
-                .map(this::toResource)
+        var workspaceIdOpt = currentWorkspaceService.getCurrentWorkspaceId();
+        if (workspaceIdOpt.isEmpty()) {
+            return ResponseEntity.status(org.springframework.http.HttpStatus.FORBIDDEN).build();
+        }
+        Long workspaceId = workspaceIdOpt.get();
+        var accesses = userWorkspaceAccessRepository.findByWorkspaceId(workspaceId);
+        var resources = accesses.stream()
+                .filter(a -> a.getUserProfile() != null)
+                .map(a -> toResource(a.getUserProfile(), a.getRole() != null ? a.getRole().getName() : "User", workspaceId))
                 .toList();
         return ResponseEntity.ok(resources);
     }
 
-    private LabUserResource toResource(UserProfile profile) {
-        String roleName = profile.getRole() != null ? profile.getRole().getName() : "User";
-        
+    private LabUserResource toResource(UserProfile profile, String roleName, Long workspaceId) {
         String labsAccess = "None";
         if (profile.getLabAccesses() != null && !profile.getLabAccesses().isEmpty()) {
             labsAccess = profile.getLabAccesses().stream()
-                    .filter(a -> a.getLaboratory() != null)
+                    .filter(a -> a.getLaboratory() != null && a.getLaboratory().getWorkspace() != null && a.getLaboratory().getWorkspace().getId().equals(workspaceId))
                     .map(a -> a.getLaboratory().getName())
                     .collect(Collectors.joining(", "));
         }
+        if (labsAccess.isEmpty()) labsAccess = "None";
 
         String initials = "";
         if (profile.getFullName() != null && !profile.getFullName().isBlank()) {

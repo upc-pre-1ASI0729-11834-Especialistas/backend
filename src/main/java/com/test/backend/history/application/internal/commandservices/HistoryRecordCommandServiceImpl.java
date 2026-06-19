@@ -19,17 +19,23 @@ public class HistoryRecordCommandServiceImpl implements HistoryRecordCommandServ
 
     private final HistoryRecordRepository historyRecordRepository;
     private final LaboratoryRepository laboratoryRepository;
+    private final com.test.backend.shared.application.CurrentWorkspaceService currentWorkspaceService;
 
     public HistoryRecordCommandServiceImpl(HistoryRecordRepository historyRecordRepository,
-                                           LaboratoryRepository laboratoryRepository) {
+                                           LaboratoryRepository laboratoryRepository,
+                                           com.test.backend.shared.application.CurrentWorkspaceService currentWorkspaceService) {
         this.historyRecordRepository = historyRecordRepository;
         this.laboratoryRepository = laboratoryRepository;
+        this.currentWorkspaceService = currentWorkspaceService;
     }
 
     @Override
     @Transactional
     public Optional<HistoryRecord> handle(CreateHistoryRecordCommand command) {
-        Laboratory laboratory = findLaboratoryByName(command.lab());
+        Long workspaceId = currentWorkspaceService.getCurrentWorkspaceId()
+                .orElseThrow(() -> new IllegalStateException("User does not have an active workspace"));
+
+        Laboratory laboratory = findLaboratoryByName(command.lab(), workspaceId);
         var record = new HistoryRecord(command, laboratory);
         historyRecordRepository.save(record);
 
@@ -70,11 +76,14 @@ public class HistoryRecordCommandServiceImpl implements HistoryRecordCommandServ
     @Override
     @Transactional
     public Optional<HistoryRecord> handle(UpdateHistoryRecordCommand command) {
-        var recordOpt = historyRecordRepository.findById(command.id());
+        Long workspaceId = currentWorkspaceService.getCurrentWorkspaceId()
+                .orElseThrow(() -> new IllegalStateException("User does not have an active workspace"));
+
+        var recordOpt = historyRecordRepository.findByIdAndLaboratoryWorkspaceId(command.id(), workspaceId);
         if (recordOpt.isEmpty()) return Optional.empty();
 
         var record = recordOpt.get();
-        Laboratory laboratory = findLaboratoryByName(command.lab());
+        Laboratory laboratory = findLaboratoryByName(command.lab(), workspaceId);
         
         record.updateFrom(command, laboratory);
         historyRecordRepository.save(record);
@@ -84,15 +93,18 @@ public class HistoryRecordCommandServiceImpl implements HistoryRecordCommandServ
     @Override
     @Transactional
     public void handle(DeleteHistoryRecordCommand command) {
-        if (!historyRecordRepository.existsById(command.id())) {
-            throw new IllegalArgumentException("HistoryRecord not found");
-        }
-        historyRecordRepository.deleteById(command.id());
+        Long workspaceId = currentWorkspaceService.getCurrentWorkspaceId()
+                .orElseThrow(() -> new IllegalStateException("User does not have an active workspace"));
+
+        var record = historyRecordRepository.findByIdAndLaboratoryWorkspaceId(command.id(), workspaceId)
+                .orElseThrow(() -> new IllegalArgumentException("HistoryRecord not found in this workspace"));
+
+        historyRecordRepository.delete(record);
     }
 
-    private Laboratory findLaboratoryByName(String labName) {
+    private Laboratory findLaboratoryByName(String labName, Long workspaceId) {
         if (labName == null || labName.isBlank()) return null;
-        return laboratoryRepository.findAll().stream()
+        return laboratoryRepository.findByWorkspaceId(workspaceId).stream()
                 .filter(l -> l.getName().equalsIgnoreCase(labName) || l.getLabCode().equalsIgnoreCase(labName))
                 .findFirst()
                 .orElse(null);

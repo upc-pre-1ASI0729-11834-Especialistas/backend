@@ -10,4 +10,6 @@ import java.util.Optional;
 public interface SensorConfigurationRepository extends JpaRepository<SensorConfiguration, Long> {
     Optional<SensorConfiguration> findBySensorName(String sensorName);
     Optional<SensorConfiguration> findByUnit(String unit);
+    java.util.List<SensorConfiguration> findByLaboratoryWorkspaceId(Long workspaceId);
+    Optional<SensorConfiguration> findByIdAndLaboratoryWorkspaceId(Long id, Long workspaceId);
 }

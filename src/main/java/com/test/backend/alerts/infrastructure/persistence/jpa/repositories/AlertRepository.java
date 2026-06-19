@@ -9,4 +9,6 @@ import java.util.List;
 @Repository
 public interface AlertRepository extends JpaRepository<Alert, Long> {
     List<Alert> findByLaboratoryId(Long laboratoryId);
+    List<Alert> findByLaboratoryWorkspaceId(Long workspaceId);
+    java.util.Optional<Alert> findByIdAndLaboratoryWorkspaceId(Long id, Long workspaceId);
 }

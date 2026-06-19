@@ -5,9 +5,7 @@ import com.test.backend.automation.interfaces.rest.resources.GeneralSettingResou
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -36,5 +34,29 @@ public class GeneralSettingController {
                 ))
                 .toList();
         return ResponseEntity.ok(resources);
+    }
+
+    @PutMapping("/{id}")
+    @Operation(summary = "Update general setting")
+    public ResponseEntity<GeneralSettingResource> updateSetting(@PathVariable Long id, @RequestBody GeneralSettingResource resource) {
+        var settingOpt = generalSettingRepository.findById(id);
+        if (settingOpt.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        var setting = settingOpt.get();
+        if (resource.value() != null) {
+            setting.setValue(resource.value());
+        }
+        if (resource.description() != null) {
+            setting.setDescription(resource.description());
+        }
+        generalSettingRepository.save(setting);
+        return ResponseEntity.ok(new GeneralSettingResource(
+                setting.getId(),
+                setting.getSettingKey(),
+                setting.getValue(),
+                setting.getCategory(),
+                setting.getDescription()
+        ));
     }
 }

@@ -18,21 +18,26 @@ public class AlertCommandServiceImpl implements AlertCommandService {
 
     private final AlertRepository alertRepository;
     private final LaboratoryRepository laboratoryRepository;
+    private final com.test.backend.shared.application.CurrentWorkspaceService currentWorkspaceService;
 
-    public AlertCommandServiceImpl(AlertRepository alertRepository, LaboratoryRepository laboratoryRepository) {
+    public AlertCommandServiceImpl(AlertRepository alertRepository,
+                                   LaboratoryRepository laboratoryRepository,
+                                   com.test.backend.shared.application.CurrentWorkspaceService currentWorkspaceService) {
         this.alertRepository = alertRepository;
         this.laboratoryRepository = laboratoryRepository;
+        this.currentWorkspaceService = currentWorkspaceService;
     }
 
     @Override
     @Transactional
     public Optional<Alert> handle(CreateAlertCommand command) {
+        Long workspaceId = currentWorkspaceService.getCurrentWorkspaceId()
+                .orElseThrow(() -> new IllegalStateException("User does not have an active workspace"));
+
         Laboratory laboratory = null;
         if (command.laboratoryId() != null) {
-            var labOpt = laboratoryRepository.findById(command.laboratoryId());
-            if (labOpt.isPresent()) {
-                laboratory = labOpt.get();
-            }
+            laboratory = laboratoryRepository.findByIdAndWorkspaceId(command.laboratoryId(), workspaceId)
+                    .orElseThrow(() -> new IllegalArgumentException("Laboratory not found in this workspace"));
         }
         var alert = new Alert(command, laboratory);
         alertRepository.save(alert);
@@ -42,16 +47,17 @@ public class AlertCommandServiceImpl implements AlertCommandService {
     @Override
     @Transactional
     public Optional<Alert> handle(UpdateAlertCommand command) {
-        var alertOpt = alertRepository.findById(command.id());
+        Long workspaceId = currentWorkspaceService.getCurrentWorkspaceId()
+                .orElseThrow(() -> new IllegalStateException("User does not have an active workspace"));
+
+        var alertOpt = alertRepository.findByIdAndLaboratoryWorkspaceId(command.id(), workspaceId);
         if (alertOpt.isEmpty()) return Optional.empty();
 
         var alert = alertOpt.get();
         Laboratory laboratory = null;
         if (command.laboratoryId() != null) {
-            var labOpt = laboratoryRepository.findById(command.laboratoryId());
-            if (labOpt.isPresent()) {
-                laboratory = labOpt.get();
-            }
+            laboratory = laboratoryRepository.findByIdAndWorkspaceId(command.laboratoryId(), workspaceId)
+                    .orElseThrow(() -> new IllegalArgumentException("Laboratory not found in this workspace"));
         } else if (alert.getLaboratory() != null) {
             laboratory = alert.getLaboratory();
         }
@@ -80,9 +86,12 @@ public class AlertCommandServiceImpl implements AlertCommandService {
     @Override
     @Transactional
     public void handle(DeleteAlertCommand command) {
-        if (!alertRepository.existsById(command.id())) {
-            throw new IllegalArgumentException("Alert not found");
-        }
-        alertRepository.deleteById(command.id());
+        Long workspaceId = currentWorkspaceService.getCurrentWorkspaceId()
+                .orElseThrow(() -> new IllegalStateException("User does not have an active workspace"));
+
+        var alert = alertRepository.findByIdAndLaboratoryWorkspaceId(command.id(), workspaceId)
+                .orElseThrow(() -> new IllegalArgumentException("Alert not found in this workspace"));
+
+        alertRepository.delete(alert);
     }
 }
