@@ -43,26 +43,47 @@ public class SensorConfiguration extends AuditableAbstractAggregateRoot<SensorCo
     @JoinColumn(name = "laboratory_id")
     private Laboratory laboratory;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "equipment_threshold_id", nullable = true)
+    private EquipmentThreshold equipment;
+
+    @Column(name = "min_threshold")
+    private Double minThreshold;
+
+    @Column(name = "max_threshold")
+    private Double maxThreshold;
+
+    @Column(name = "warning_threshold")
+    private Double warningThreshold;
+
     @OneToMany(mappedBy = "sensorConfiguration", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CalibrationRecord> calibrationRecords = new ArrayList<>();
 
-    public SensorConfiguration(com.test.backend.automation.domain.model.commands.CreateSensorConfigurationCommand command, Laboratory laboratory) {
+    public SensorConfiguration(com.test.backend.automation.domain.model.commands.CreateSensorConfigurationCommand command, Laboratory laboratory, EquipmentThreshold equipment) {
         this.sensorName = command.sensorName();
         this.type = command.type();
         this.unit = command.unit();
         this.isActive = command.isActive();
         this.laboratory = laboratory;
+        this.equipment = equipment;
+        this.minThreshold = command.minThreshold();
+        this.maxThreshold = command.maxThreshold();
+        this.warningThreshold = command.warningThreshold();
         this.status = "INACTIVE";
         this.lastConnected = null;
         this.calibrationDate = null;
     }
 
-    public SensorConfiguration updateFrom(com.test.backend.automation.domain.model.commands.UpdateSensorConfigurationCommand command, Laboratory laboratory) {
+    public SensorConfiguration updateFrom(com.test.backend.automation.domain.model.commands.UpdateSensorConfigurationCommand command, Laboratory laboratory, EquipmentThreshold equipment) {
         this.sensorName = command.sensorName();
         this.type = command.type();
         this.unit = command.unit();
         this.isActive = command.isActive();
         this.laboratory = laboratory;
+        this.equipment = equipment;
+        this.minThreshold = command.minThreshold();
+        this.maxThreshold = command.maxThreshold();
+        this.warningThreshold = command.warningThreshold();
         return this;
     }
 

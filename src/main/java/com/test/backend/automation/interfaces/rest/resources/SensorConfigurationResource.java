@@ -10,5 +10,10 @@ public record SensorConfigurationResource(
     String status,
     java.time.LocalDateTime lastConnected,
     Long laboratoryId,
-    String laboratoryName
+    String laboratoryName,
+    Long equipmentId,
+    String equipmentName,
+    Double minThreshold,
+    Double maxThreshold,
+    Double warningThreshold
 ) {}

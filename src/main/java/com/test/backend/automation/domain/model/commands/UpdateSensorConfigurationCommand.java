@@ -6,5 +6,9 @@ public record UpdateSensorConfigurationCommand(
     String type,
     String unit,
     boolean isActive,
-    Long laboratoryId
+    Long laboratoryId,
+    Long equipmentId,
+    Double minThreshold,
+    Double maxThreshold,
+    Double warningThreshold
 ) {}

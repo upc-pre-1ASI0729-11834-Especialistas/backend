@@ -7,6 +7,8 @@ import com.test.backend.automation.domain.model.aggregates.SensorConfiguration;
 import com.test.backend.automation.infrastructure.persistence.jpa.repositories.SensorConfigurationRepository;
 import com.test.backend.automation.interfaces.rest.resources.SensorConfigurationResource;
 import com.test.backend.automation.interfaces.rest.resources.CalibrateSensorResource;
+import com.test.backend.automation.domain.model.aggregates.EquipmentThreshold;
+import com.test.backend.automation.infrastructure.persistence.jpa.repositories.EquipmentThresholdRepository;
 import com.test.backend.labs.domain.model.aggregates.Laboratory;
 import com.test.backend.labs.infrastructure.persistence.jpa.repositories.LaboratoryRepository;
 import com.test.backend.shared.application.CurrentWorkspaceService;
@@ -25,13 +27,16 @@ public class SensorConfigurationController {
 
     private final SensorConfigurationRepository sensorConfigurationRepository;
     private final LaboratoryRepository laboratoryRepository;
+    private final EquipmentThresholdRepository equipmentThresholdRepository;
     private final CurrentWorkspaceService currentWorkspaceService;
 
     public SensorConfigurationController(SensorConfigurationRepository sensorConfigurationRepository,
                                          LaboratoryRepository laboratoryRepository,
+                                         EquipmentThresholdRepository equipmentThresholdRepository,
                                          CurrentWorkspaceService currentWorkspaceService) {
         this.sensorConfigurationRepository = sensorConfigurationRepository;
         this.laboratoryRepository = laboratoryRepository;
+        this.equipmentThresholdRepository = equipmentThresholdRepository;
         this.currentWorkspaceService = currentWorkspaceService;
     }
 
@@ -78,14 +83,24 @@ public class SensorConfigurationController {
                 return ResponseEntity.badRequest().build(); // Laboratory does not exist in user's workspace
             }
         }
+
+        EquipmentThreshold equipment = null;
+        if (resource.equipmentId() != null) {
+            equipment = equipmentThresholdRepository.findById(resource.equipmentId()).orElse(null);
+        }
+
         var command = new CreateSensorConfigurationCommand(
                 resource.sensorName(),
                 resource.type(),
                 resource.unit(),
                 resource.isActive(),
-                resource.laboratoryId()
+                resource.laboratoryId(),
+                resource.equipmentId(),
+                resource.minThreshold(),
+                resource.maxThreshold(),
+                resource.warningThreshold()
         );
-        var config = new SensorConfiguration(command, laboratory);
+        var config = new SensorConfiguration(command, laboratory, equipment);
         sensorConfigurationRepository.save(config);
         return new ResponseEntity<>(toResource(config), HttpStatus.CREATED);
     }
@@ -109,15 +124,25 @@ public class SensorConfigurationController {
                 return ResponseEntity.badRequest().build();
             }
         }
+
+        EquipmentThreshold equipment = null;
+        if (resource.equipmentId() != null) {
+            equipment = equipmentThresholdRepository.findById(resource.equipmentId()).orElse(null);
+        }
+
         var command = new UpdateSensorConfigurationCommand(
                 id,
                 resource.sensorName() != null ? resource.sensorName() : config.getSensorName(),
                 resource.type() != null ? resource.type() : config.getType(),
                 resource.unit() != null ? resource.unit() : config.getUnit(),
                 resource.isActive(),
-                resource.laboratoryId() != null ? resource.laboratoryId() : (config.getLaboratory() != null ? config.getLaboratory().getId() : null)
+                resource.laboratoryId() != null ? resource.laboratoryId() : (config.getLaboratory() != null ? config.getLaboratory().getId() : null),
+                resource.equipmentId(),
+                resource.minThreshold(),
+                resource.maxThreshold(),
+                resource.warningThreshold()
         );
-        config.updateFrom(command, laboratory);
+        config.updateFrom(command, laboratory, equipment);
         sensorConfigurationRepository.save(config);
         return ResponseEntity.ok(toResource(config));
     }
@@ -156,7 +181,12 @@ public class SensorConfigurationController {
                 config.getStatus(),
                 config.getLastConnected(),
                 config.getLaboratory() != null ? config.getLaboratory().getId() : null,
-                config.getLaboratory() != null ? config.getLaboratory().getName() : null
+                config.getLaboratory() != null ? config.getLaboratory().getName() : null,
+                config.getEquipment() != null ? config.getEquipment().getId() : null,
+                config.getEquipment() != null ? config.getEquipment().getName() : null,
+                config.getMinThreshold(),
+                config.getMaxThreshold(),
+                config.getWarningThreshold()
         );
     }
 }
