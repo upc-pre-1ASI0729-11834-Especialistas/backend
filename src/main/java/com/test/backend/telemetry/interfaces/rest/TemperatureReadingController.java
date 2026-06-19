@@ -7,6 +7,7 @@ import com.test.backend.telemetry.domain.model.queries.GetAllSensorReadingsQuery
 import com.test.backend.telemetry.domain.services.SensorReadingQueryService;
 import com.test.backend.telemetry.interfaces.rest.resources.TemperatureReadingResource;
 import com.test.backend.telemetry.infrastructure.persistence.jpa.repositories.SensorReadingRepository;
+import com.test.backend.shared.application.CurrentWorkspaceService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
@@ -23,13 +24,16 @@ public class TemperatureReadingController {
     private final SensorReadingQueryService sensorReadingQueryService;
     private final SensorReadingRepository sensorReadingRepository;
     private final LaboratoryRepository laboratoryRepository;
+    private final CurrentWorkspaceService currentWorkspaceService;
 
     public TemperatureReadingController(SensorReadingQueryService sensorReadingQueryService,
                                          SensorReadingRepository sensorReadingRepository,
-                                         LaboratoryRepository laboratoryRepository) {
+                                         LaboratoryRepository laboratoryRepository,
+                                         CurrentWorkspaceService currentWorkspaceService) {
         this.sensorReadingQueryService = sensorReadingQueryService;
         this.sensorReadingRepository = sensorReadingRepository;
         this.laboratoryRepository = laboratoryRepository;
+        this.currentWorkspaceService = currentWorkspaceService;
     }
 
     /**
@@ -43,7 +47,22 @@ public class TemperatureReadingController {
     public ResponseEntity<List<TemperatureReadingResource>> getReadingsByMetricKey(
             @RequestParam String metricKey) {
 
-        List<SensorReading> readings = sensorReadingRepository.findByMetricTypeKey(metricKey);
+        var profileOpt = currentWorkspaceService.getCurrentUserProfile();
+        if (profileOpt.isEmpty()) {
+            return ResponseEntity.ok(List.of());
+        }
+        var profile = profileOpt.get();
+
+        List<SensorReading> readings = sensorReadingRepository.findByLaboratoryWorkspaceIdAndMetricTypeKey(profile.getWorkspaceId(), metricKey);
+
+        if (profile.getRole() == null || !"Administrator".equalsIgnoreCase(profile.getRole().getName())) {
+            var allowedLabIds = profile.getLabAccesses().stream()
+                    .map(access -> access.getLaboratory().getId())
+                    .toList();
+            readings = readings.stream()
+                    .filter(r -> r.getLaboratory() != null && allowedLabIds.contains(r.getLaboratory().getId()))
+                    .toList();
+        }
 
         Map<String, List<SensorReading>> grouped = readings.stream()
                 .filter(r -> r.getDate() != null && r.getLaboratory() != null)

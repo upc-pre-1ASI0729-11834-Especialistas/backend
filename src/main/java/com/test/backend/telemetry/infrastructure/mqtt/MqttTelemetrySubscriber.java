@@ -376,6 +376,8 @@ public class MqttTelemetrySubscriber implements MqttCallbackExtended {
                 // Resolve matching automation rule from database
                 Optional<AutomationRule> triggeredRuleOpt = automationRuleRepository.findAll().stream()
                         .filter(rule -> rule.isActive()
+                                && rule.getWorkspaceId() != null
+                                && rule.getWorkspaceId().equals(lab.getWorkspace().getId())
                                 && rule.getTriggerMetric() != null
                                 && rule.getTriggerMetric().equalsIgnoreCase(metricType.getKey())
                                 && ("all".equalsIgnoreCase(rule.getScope()) 

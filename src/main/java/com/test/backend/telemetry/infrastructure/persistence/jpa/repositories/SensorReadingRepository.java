@@ -5,11 +5,14 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface SensorReadingRepository extends JpaRepository<SensorReading, Long> {
     List<SensorReading> findByLaboratoryId(Long laboratoryId);
     List<SensorReading> findByMetricTypeKey(String metricKey);
     List<SensorReading> findByMetricTypeId(Long metricTypeId);
-    List<SensorReading> findByLaboratoryIdAndMetricTypeKey(Long laboratoryId, String metricKey);
+    List<SensorReading> findByLaboratoryWorkspaceIdAndMetricTypeKey(Long workspaceId, String metricKey);
+    List<SensorReading> findByLaboratoryWorkspaceId(Long workspaceId);
+    Optional<SensorReading> findByIdAndLaboratoryWorkspaceId(Long id, Long workspaceId);
 }
