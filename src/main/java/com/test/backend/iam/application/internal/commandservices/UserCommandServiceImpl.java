@@ -7,11 +7,13 @@ import com.test.backend.iam.domain.model.commands.SignInCommand;
 import com.test.backend.iam.domain.model.commands.SignUpCommand;
 import com.test.backend.iam.domain.model.commands.UpdatePasswordCommand;
 import com.test.backend.iam.domain.model.entities.Role;
+import com.test.backend.iam.domain.model.events.UserRegisteredEvent;
 import com.test.backend.iam.domain.model.valueobjects.AuthenticatedUser;
 import com.test.backend.iam.domain.model.valueobjects.Roles;
 import com.test.backend.iam.domain.services.UserCommandService;
 import com.test.backend.iam.infrastructure.persistence.jpa.repositories.IamRoleRepository;
 import com.test.backend.iam.infrastructure.persistence.jpa.repositories.UserRepository;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -25,13 +27,16 @@ public class UserCommandServiceImpl implements UserCommandService {
     private final IamRoleRepository roleRepository;
     private final HashingService hashingService;
     private final TokenService tokenService;
+    private final ApplicationEventPublisher eventPublisher;
 
     public UserCommandServiceImpl(UserRepository userRepository, IamRoleRepository roleRepository,
-                                   HashingService hashingService, TokenService tokenService) {
+                                   HashingService hashingService, TokenService tokenService,
+                                   ApplicationEventPublisher eventPublisher) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.hashingService = hashingService;
         this.tokenService = tokenService;
+        this.eventPublisher = eventPublisher;
     }
 
     @Override
@@ -70,6 +75,7 @@ public class UserCommandServiceImpl implements UserCommandService {
         );
 
         userRepository.save(user);
+        eventPublisher.publishEvent(new UserRegisteredEvent(user.getEmail(), user.getFullName()));
         return Optional.of(user);
     }
 
