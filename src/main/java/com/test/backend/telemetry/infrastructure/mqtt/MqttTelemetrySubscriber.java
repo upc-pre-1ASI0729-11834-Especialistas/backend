@@ -36,6 +36,7 @@ import com.test.backend.alerts.domain.model.entities.AlertMetric;
 import com.test.backend.labs.domain.model.entities.LabAlert;
 import com.test.backend.automation.infrastructure.persistence.jpa.repositories.AutomationRuleRepository;
 import com.test.backend.automation.domain.model.aggregates.AutomationRule;
+import com.test.backend.automation.domain.model.aggregates.EquipmentThreshold;
 
 @Service
 public class MqttTelemetrySubscriber implements MqttCallbackExtended {
@@ -260,8 +261,11 @@ public class MqttTelemetrySubscriber implements MqttCallbackExtended {
      * No more contains()-based inference — icon, unit come from the catalog.
      */
     private void updateRealTimeLabMetric(Laboratory lab, MetricType metricType, Double val, SensorConfiguration sensor) {
+        String objectType = sensor.getEquipment() != null ? sensor.getEquipment().getName() : "Ambient";
         LabMetric metric = lab.getMetrics().stream()
-                .filter(m -> m.getName().equalsIgnoreCase(metricType.getKey()))
+                .filter(m -> m.getName().equalsIgnoreCase(metricType.getKey()) &&
+                             ((m.getObjectType() == null && "Ambient".equalsIgnoreCase(objectType)) ||
+                              (m.getObjectType() != null && m.getObjectType().equalsIgnoreCase(objectType))))
                 .findFirst()
                 .orElseGet(() -> {
                     LabMetric m = new LabMetric();
@@ -269,10 +273,14 @@ public class MqttTelemetrySubscriber implements MqttCallbackExtended {
                     m.setName(metricType.getKey());
                     m.setUnit(metricType.getUnit());
                     m.setIcon(metricType.getIcon());
+                    m.setObjectType(objectType);
                     lab.getMetrics().add(m);
                     return m;
                 });
 
+        if (metric.getObjectType() == null) {
+            metric.setObjectType(objectType);
+        }
         metric.setValue(String.format("%.2f", val));
         evaluateThresholds(lab, metricType, val, metric, sensor);
         laboratoryRepository.save(lab);
@@ -283,32 +291,65 @@ public class MqttTelemetrySubscriber implements MqttCallbackExtended {
      * No more contains()-based string matching — uses exact MetricType reference.
      */
     private void evaluateThresholds(Laboratory lab, MetricType metricType, Double val, LabMetric metric, SensorConfiguration sensor) {
-        if (lab.getMetricSubscriptions() == null) return;
+        Double minThreshold = null;
+        Double maxThreshold = null;
+        Double warningThreshold = null;
+        String targetName = "";
 
-        Optional<LabMetricSubscription> subscriptionOpt = lab.getMetricSubscriptions().stream()
-                .filter(sub -> sub.getMetricType().getId().equals(metricType.getId()) && sub.isActive())
-                .findFirst();
+        // Resolve thresholds
+        EquipmentThreshold equip = sensor.getEquipment();
+        if (equip != null) {
+            minThreshold = equip.getMinThreshold();
+            maxThreshold = equip.getMaxThreshold();
+            warningThreshold = equip.getWarningAt();
+            targetName = "equipment " + equip.getName();
+        } else if (sensor.getMinThreshold() != null || sensor.getMaxThreshold() != null) {
+            minThreshold = sensor.getMinThreshold();
+            maxThreshold = sensor.getMaxThreshold();
+            warningThreshold = sensor.getWarningThreshold();
+            targetName = "sensor " + sensor.getSensorName();
+        } else if (lab.getMetricSubscriptions() != null) {
+            Optional<LabMetricSubscription> subscriptionOpt = lab.getMetricSubscriptions().stream()
+                    .filter(sub -> sub.getMetricType().getId().equals(metricType.getId()) && sub.isActive())
+                    .findFirst();
+            if (subscriptionOpt.isPresent()) {
+                LabMetricSubscription sub = subscriptionOpt.get();
+                minThreshold = sub.getMinThreshold();
+                maxThreshold = sub.getMaxThreshold();
+                targetName = "laboratory ambient";
+            }
+        }
 
-        if (subscriptionOpt.isEmpty()) {
+        if (minThreshold == null && maxThreshold == null) {
             metric.setStatus("NORMAL");
             return;
         }
 
-        LabMetricSubscription subscription = subscriptionOpt.get();
-        boolean breached = false;
+        boolean criticalBreach = false;
+        boolean warningBreach = false;
+        double thresholdVal = 0.0;
 
-        if (subscription.getMinThreshold() != null && val < subscription.getMinThreshold()) {
-            breached = true;
+        if (minThreshold != null && val < minThreshold) {
+            criticalBreach = true;
+            thresholdVal = minThreshold;
         }
-        if (subscription.getMaxThreshold() != null && val > subscription.getMaxThreshold()) {
-            breached = true;
+        if (maxThreshold != null && val > maxThreshold) {
+            criticalBreach = true;
+            thresholdVal = maxThreshold;
+        }
+        if (!criticalBreach && warningThreshold != null) {
+            if (val >= warningThreshold) {
+                warningBreach = true;
+                thresholdVal = warningThreshold;
+            }
         }
 
         boolean wasCritical = "CRITICAL".equalsIgnoreCase(metric.getStatus());
+        boolean wasWarning = "WARNING".equalsIgnoreCase(metric.getStatus());
 
-        if (breached) {
+        if (criticalBreach) {
             metric.setStatus("CRITICAL");
-            metric.setThreshold(subscription.getMaxThreshold() != null ? subscription.getMaxThreshold() : subscription.getMinThreshold());
+            metric.setThreshold(thresholdVal);
             lab.setOverallStatus("CRITICAL");
             lab.setStatus("Critical");
 
@@ -317,8 +358,8 @@ public class MqttTelemetrySubscriber implements MqttCallbackExtended {
                 Alert alert = new Alert();
                 alert.setLaboratory(lab);
                 alert.setSensorConfiguration(sensor);
-                alert.setTitle(metricType.getDisplayName() + " Threshold Exceeded");
-                alert.setDescription("Sensor " + sensor.getSensorName() + " detected a critical reading of " + String.format("%.2f", val) + metricType.getUnit() + " in " + lab.getName() + ".");
+                alert.setTitle(metricType.getDisplayName() + " Critical Threshold Exceeded");
+                alert.setDescription("Sensor " + sensor.getSensorName() + " detected a critical reading of " + String.format("%.2f", val) + metricType.getUnit() + " on " + targetName + ".");
                 alert.setSeverity("CRITICAL");
                 alert.setStatus("ACTIVE");
                 alert.setLabName(lab.getName());
@@ -338,7 +379,6 @@ public class MqttTelemetrySubscriber implements MqttCallbackExtended {
                 AlertMetric thresholdMetric = new AlertMetric();
                 thresholdMetric.setAlert(alert);
                 thresholdMetric.setLabel("threshold");
-                double thresholdVal = subscription.getMaxThreshold() != null ? subscription.getMaxThreshold() : subscription.getMinThreshold();
                 thresholdMetric.setValue(String.format("%.2f", thresholdVal) + metricType.getUnit());
                 alertMetrics.add(thresholdMetric);
 
@@ -433,14 +473,67 @@ public class MqttTelemetrySubscriber implements MqttCallbackExtended {
                 labAlert.setAlertId(alert.getId());
                 lab.getAlerts().add(0, labAlert);
             }
+        } else if (warningBreach) {
+            metric.setStatus("WARNING");
+            metric.setThreshold(thresholdVal);
+            if (!"CRITICAL".equalsIgnoreCase(lab.getOverallStatus())) {
+                lab.setOverallStatus("WARNING");
+                lab.setStatus("Warning");
+            }
+
+            if (!wasWarning && !wasCritical) {
+                // Generate a warning Alert
+                Alert alert = new Alert();
+                alert.setLaboratory(lab);
+                alert.setSensorConfiguration(sensor);
+                alert.setTitle(metricType.getDisplayName() + " Warning Level Breached");
+                alert.setDescription("Sensor " + sensor.getSensorName() + " detected a warning reading of " + String.format("%.2f", val) + metricType.getUnit() + " on " + targetName + ".");
+                alert.setSeverity("WARNING");
+                alert.setStatus("ACTIVE");
+                alert.setLabName(lab.getName());
+                alert.setTimeAgo("Just now");
+
+                alert = alertRepository.save(alert);
+
+                List<AlertMetric> alertMetrics = new java.util.ArrayList<>();
+                
+                AlertMetric currentValMetric = new AlertMetric();
+                currentValMetric.setAlert(alert);
+                currentValMetric.setLabel("currentValue");
+                currentValMetric.setValue(String.format("%.2f", val) + metricType.getUnit());
+                alertMetrics.add(currentValMetric);
+
+                AlertMetric thresholdMetric = new AlertMetric();
+                thresholdMetric.setAlert(alert);
+                thresholdMetric.setLabel("threshold");
+                thresholdMetric.setValue(String.format("%.2f", thresholdVal) + metricType.getUnit());
+                alertMetrics.add(thresholdMetric);
+
+                alert.getMetrics().addAll(alertMetrics);
+                alertRepository.save(alert);
+
+                LabAlert labAlert = new LabAlert();
+                labAlert.setLaboratory(lab);
+                labAlert.setTitle(alert.getTitle());
+                labAlert.setSource("Sensor " + sensor.getSensorName());
+                labAlert.setSeverity("WARNING");
+                labAlert.setTimeAgo("Just now");
+                labAlert.setAlertId(alert.getId());
+                lab.getAlerts().add(0, labAlert);
+            }
         } else {
             metric.setStatus("NORMAL");
-            // Reset lab overall status if no other metrics are critical
+            // Reset lab overall status if no other metrics are critical or warning
             boolean anyOtherCritical = lab.getMetrics().stream()
                     .anyMatch(m -> "CRITICAL".equalsIgnoreCase(m.getStatus()) && !m.getName().equalsIgnoreCase(metricType.getKey()));
-            if (!anyOtherCritical) {
+            boolean anyOtherWarning = lab.getMetrics().stream()
+                    .anyMatch(m -> "WARNING".equalsIgnoreCase(m.getStatus()) && !m.getName().equalsIgnoreCase(metricType.getKey()));
+            if (!anyOtherCritical && !anyOtherWarning) {
                 lab.setOverallStatus("OPERATIONAL");
                 lab.setStatus("Operational");
+            } else if (!anyOtherCritical) {
+                lab.setOverallStatus("WARNING");
+                lab.setStatus("Warning");
             }
         }
     }

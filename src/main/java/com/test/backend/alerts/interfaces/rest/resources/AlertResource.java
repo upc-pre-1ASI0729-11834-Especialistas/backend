@@ -14,5 +14,6 @@ public record AlertResource(
     String labLocation,
     Long sensorId,
     String sensorName,
+    String equipmentName,
     List<AlertMetricResource> metrics
 ) {}

@@ -38,6 +38,10 @@ public class AlertResourceFromEntityAssembler {
                 ? entity.getSensorConfiguration().getSensorName() 
                 : "N/A";
 
+        String equipmentName = (entity.getSensorConfiguration() != null && entity.getSensorConfiguration().getEquipment() != null)
+                ? entity.getSensorConfiguration().getEquipment().getName()
+                : null;
+
         List<AlertMetricResource> metrics = List.of();
         if (entity.getMetrics() != null) {
             metrics = entity.getMetrics().stream()
@@ -57,6 +61,7 @@ public class AlertResourceFromEntityAssembler {
             labLocation,
             sensorId,
             sensorName,
+            equipmentName,
             metrics
         );
     }
