@@ -69,6 +69,7 @@ public class WebSecurityConfiguration {
                                 "/api/v1/authentication/sign-in",
                                 "/api/v1/authentication/sign-up",
                                 "/api/v1/system/status",
+                                "/api/v1/telemetry/simulate",
                                 "/v3/api-docs/**",
                                 "/swagger-ui/**",
                                 "/swagger-ui.html"
