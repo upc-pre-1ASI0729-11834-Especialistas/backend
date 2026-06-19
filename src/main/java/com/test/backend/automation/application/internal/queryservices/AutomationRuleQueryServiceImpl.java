@@ -13,18 +13,24 @@ import java.util.Optional;
 public class AutomationRuleQueryServiceImpl implements AutomationRuleQueryService {
 
     private final AutomationRuleRepository automationRuleRepository;
+    private final com.test.backend.shared.application.CurrentWorkspaceService currentWorkspaceService;
 
-    public AutomationRuleQueryServiceImpl(AutomationRuleRepository automationRuleRepository) {
+    public AutomationRuleQueryServiceImpl(AutomationRuleRepository automationRuleRepository,
+                                           com.test.backend.shared.application.CurrentWorkspaceService currentWorkspaceService) {
         this.automationRuleRepository = automationRuleRepository;
+        this.currentWorkspaceService = currentWorkspaceService;
     }
 
     @Override
     public List<AutomationRule> handle(GetAllAutomationRulesQuery query) {
-        return automationRuleRepository.findAll();
+        return currentWorkspaceService.getCurrentWorkspaceId()
+                .map(automationRuleRepository::findByWorkspaceId)
+                .orElse(List.of());
     }
 
     @Override
     public Optional<AutomationRule> handle(Long id) {
-        return automationRuleRepository.findById(id);
+        return currentWorkspaceService.getCurrentWorkspaceId()
+                .flatMap(workspaceId -> automationRuleRepository.findByIdAndWorkspaceId(id, workspaceId));
     }
 }

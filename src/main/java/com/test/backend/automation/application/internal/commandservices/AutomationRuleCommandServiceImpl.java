@@ -18,21 +18,28 @@ public class AutomationRuleCommandServiceImpl implements AutomationRuleCommandSe
 
     private final AutomationRuleRepository automationRuleRepository;
     private final LaboratoryRepository laboratoryRepository;
+    private final com.test.backend.shared.application.CurrentWorkspaceService currentWorkspaceService;
 
     public AutomationRuleCommandServiceImpl(AutomationRuleRepository automationRuleRepository,
-                                           LaboratoryRepository laboratoryRepository) {
+                                            LaboratoryRepository laboratoryRepository,
+                                            com.test.backend.shared.application.CurrentWorkspaceService currentWorkspaceService) {
         this.automationRuleRepository = automationRuleRepository;
         this.laboratoryRepository = laboratoryRepository;
+        this.currentWorkspaceService = currentWorkspaceService;
     }
 
     @Override
     @Transactional
     public Optional<AutomationRule> handle(CreateAutomationRuleCommand command) {
+        Long workspaceId = currentWorkspaceService.getCurrentWorkspaceId()
+                .orElseThrow(() -> new IllegalStateException("User does not have an active workspace"));
+
         Laboratory lab = null;
         if (command.specificLabId() != null) {
-            lab = laboratoryRepository.findById(command.specificLabId()).orElse(null);
+            lab = laboratoryRepository.findByIdAndWorkspaceId(command.specificLabId(), workspaceId)
+                    .orElseThrow(() -> new IllegalArgumentException("Laboratory not found in this workspace"));
         }
-        var rule = new AutomationRule(command, lab);
+        var rule = new AutomationRule(command, lab, workspaceId);
         automationRuleRepository.save(rule);
         return Optional.of(rule);
     }
@@ -40,13 +47,17 @@ public class AutomationRuleCommandServiceImpl implements AutomationRuleCommandSe
     @Override
     @Transactional
     public Optional<AutomationRule> handle(UpdateAutomationRuleCommand command) {
-        var ruleOpt = automationRuleRepository.findById(command.id());
+        Long workspaceId = currentWorkspaceService.getCurrentWorkspaceId()
+                .orElseThrow(() -> new IllegalStateException("User does not have an active workspace"));
+
+        var ruleOpt = automationRuleRepository.findByIdAndWorkspaceId(command.id(), workspaceId);
         if (ruleOpt.isEmpty()) return Optional.empty();
 
         var rule = ruleOpt.get();
         Laboratory lab = null;
         if (command.specificLabId() != null) {
-            lab = laboratoryRepository.findById(command.specificLabId()).orElse(null);
+            lab = laboratoryRepository.findByIdAndWorkspaceId(command.specificLabId(), workspaceId)
+                    .orElseThrow(() -> new IllegalArgumentException("Laboratory not found in this workspace"));
         }
 
         rule.updateFrom(command, lab);
@@ -57,9 +68,12 @@ public class AutomationRuleCommandServiceImpl implements AutomationRuleCommandSe
     @Override
     @Transactional
     public void handle(DeleteAutomationRuleCommand command) {
-        if (!automationRuleRepository.existsById(command.id())) {
-            throw new IllegalArgumentException("AutomationRule not found");
-        }
-        automationRuleRepository.deleteById(command.id());
+        Long workspaceId = currentWorkspaceService.getCurrentWorkspaceId()
+                .orElseThrow(() -> new IllegalStateException("User does not have an active workspace"));
+
+        var rule = automationRuleRepository.findByIdAndWorkspaceId(command.id(), workspaceId)
+                .orElseThrow(() -> new IllegalArgumentException("AutomationRule not found in this workspace"));
+
+        automationRuleRepository.delete(rule);
     }
 }

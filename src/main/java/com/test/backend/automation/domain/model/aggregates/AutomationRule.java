@@ -58,7 +58,10 @@ public class AutomationRule extends AuditableAbstractAggregateRoot<AutomationRul
     @Column(name = "auto_resolve")
     private boolean autoResolve;
 
-    public AutomationRule(com.test.backend.automation.domain.model.commands.CreateAutomationRuleCommand command, Laboratory specificLab) {
+    @Column(name = "workspace_id", nullable = false)
+    private Long workspaceId;
+
+    public AutomationRule(com.test.backend.automation.domain.model.commands.CreateAutomationRuleCommand command, Laboratory specificLab, Long workspaceId) {
         this.name = command.name();
         this.active = command.active();
         this.lastTriggered = command.lastTriggered();
@@ -72,6 +75,7 @@ public class AutomationRule extends AuditableAbstractAggregateRoot<AutomationRul
         this.actions = command.actions();
         this.executionLimitMins = command.executionLimitMins();
         this.autoResolve = command.autoResolve();
+        this.workspaceId = workspaceId;
     }
 
     public AutomationRule updateFrom(com.test.backend.automation.domain.model.commands.UpdateAutomationRuleCommand command, Laboratory specificLab) {
