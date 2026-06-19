@@ -311,11 +311,204 @@ public class TemporarySeeder implements CommandLineRunner {
             if (humidityType != null) lab4.getMetricSubscriptions().add(new LabMetricSubscription(lab4, humidityType, 25.0, 55.0, true));
             lab4 = laboratoryRepository.save(lab4);
 
+            // Lab 5: Molecular Biology Lab
+            var lab5 = new Laboratory();
+            lab5.setName("Molecular Biology Lab");
+            lab5.setType("Molecular Biology");
+            lab5.setStatus("Operational");
+            lab5.setBuilding("Building A");
+            lab5.setFloor("Floor 3");
+            lab5.setLabCode("LAB-MOLB-05");
+            lab5.setRoomNumber("302");
+            lab5.setDescription("DNA/RNA extraction and amplification research");
+            lab5.setOverallStatus("Operational");
+            lab5.setActive(true);
+            lab5.setLive(true);
+            lab5.setNextMaintenance(LocalDate.now().plusDays(30));
+            lab5.setMaintenanceDaysLeft(30);
+            lab5.setNotificationPreferences(new NotificationPreferences(true, true, false, false));
+            lab5.setWorkspace(workspace);
+            lab5 = laboratoryRepository.save(lab5);
+
+            if (tempType != null) lab5.getMetricSubscriptions().add(new LabMetricSubscription(lab5, tempType, 18.0, 26.0, true));
+            if (humidityType != null) lab5.getMetricSubscriptions().add(new LabMetricSubscription(lab5, humidityType, 30.0, 60.0, true));
+            if (airQualityType != null) lab5.getMetricSubscriptions().add(new LabMetricSubscription(lab5, airQualityType, 0.0, 50.0, true));
+            lab5 = laboratoryRepository.save(lab5);
+
+            // Lab 6: Clean Room Class 100
+            var lab6 = new Laboratory();
+            lab6.setName("Clean Room Class 100");
+            lab6.setType("Micro-fabrication");
+            lab6.setStatus("Operational");
+            lab6.setBuilding("Building C");
+            lab6.setFloor("Floor 1");
+            lab6.setLabCode("LAB-CLEAN-06");
+            lab6.setRoomNumber("112");
+            lab6.setDescription("Particulate-free environment for sensitive material synthesis");
+            lab6.setOverallStatus("Operational");
+            lab6.setActive(true);
+            lab6.setLive(true);
+            lab6.setNextMaintenance(LocalDate.now().plusDays(10));
+            lab6.setMaintenanceDaysLeft(10);
+            lab6.setNotificationPreferences(new NotificationPreferences(true, true, true, false));
+            lab6.setWorkspace(workspace);
+            lab6 = laboratoryRepository.save(lab6);
+
+            if (tempType != null) lab6.getMetricSubscriptions().add(new LabMetricSubscription(lab6, tempType, 19.0, 23.0, true));
+            if (humidityType != null) lab6.getMetricSubscriptions().add(new LabMetricSubscription(lab6, humidityType, 40.0, 50.0, true));
+            if (pressureType != null) lab6.getMetricSubscriptions().add(new LabMetricSubscription(lab6, pressureType, 50.0, 150.0, true));
+            if (airQualityType != null) lab6.getMetricSubscriptions().add(new LabMetricSubscription(lab6, airQualityType, 0.0, 50.0, true));
+            lab6 = laboratoryRepository.save(lab6);
+
+            // Lab 7: Radiation Research Facility
+            var lab7 = new Laboratory();
+            lab7.setName("Radiation Research Facility");
+            lab7.setType("Nuclear/Radiology");
+            lab7.setStatus("Warning");
+            lab7.setBuilding("Building D");
+            lab7.setFloor("Floor B1");
+            lab7.setLabCode("LAB-RAD-07");
+            lab7.setRoomNumber("015");
+            lab7.setDescription("Shielded laboratory for isotope tracking and radiation physics");
+            lab7.setOverallStatus("Warning");
+            lab7.setActive(true);
+            lab7.setLive(true);
+            lab7.setNextMaintenance(LocalDate.now().plusDays(25));
+            lab7.setMaintenanceDaysLeft(25);
+            lab7.setNotificationPreferences(new NotificationPreferences(true, false, true, true));
+            lab7.setWorkspace(workspace);
+            lab7 = laboratoryRepository.save(lab7);
+
+            if (tempType != null) lab7.getMetricSubscriptions().add(new LabMetricSubscription(lab7, tempType, 18.0, 24.0, true));
+            if (pressureType != null) lab7.getMetricSubscriptions().add(new LabMetricSubscription(lab7, pressureType, 950.0, 1050.0, true));
+            if (vibrationType != null) lab7.getMetricSubscriptions().add(new LabMetricSubscription(lab7, vibrationType, 0.0, 3.0, true));
+            lab7 = laboratoryRepository.save(lab7);
+
+            // Lab 8: Pharmaceutical Formulation Unit
+            var lab8 = new Laboratory();
+            lab8.setName("Pharmaceutical Formulation Unit");
+            lab8.setType("Pharmaceutics");
+            lab8.setStatus("Critical");
+            lab8.setBuilding("Building B");
+            lab8.setFloor("Floor 2");
+            lab8.setLabCode("LAB-PHARM-08");
+            lab8.setRoomNumber("205");
+            lab8.setDescription("Solid-dosage form blending, granulation and compression");
+            lab8.setOverallStatus("Critical");
+            lab8.setActive(true);
+            lab8.setLive(true);
+            lab8.setNextMaintenance(LocalDate.now().plusDays(5));
+            lab8.setMaintenanceDaysLeft(5);
+            lab8.setNotificationPreferences(new NotificationPreferences(true, true, true, true));
+            lab8.setWorkspace(workspace);
+            lab8 = laboratoryRepository.save(lab8);
+
+            if (tempType != null) lab8.getMetricSubscriptions().add(new LabMetricSubscription(lab8, tempType, 15.0, 25.0, true));
+            if (humidityType != null) lab8.getMetricSubscriptions().add(new LabMetricSubscription(lab8, humidityType, 30.0, 50.0, true));
+            if (co2Type != null) lab8.getMetricSubscriptions().add(new LabMetricSubscription(lab8, co2Type, 400.0, 1000.0, true));
+            lab8 = laboratoryRepository.save(lab8);
+
+            // Lab 9: Genetics Sequencing Center
+            var lab9 = new Laboratory();
+            lab9.setName("Genetics Sequencing Center");
+            lab9.setType("Genomics");
+            lab9.setStatus("Warning");
+            lab9.setBuilding("Building A");
+            lab9.setFloor("Floor 2");
+            lab9.setLabCode("LAB-GENE-09");
+            lab9.setRoomNumber("218");
+            lab9.setDescription("High-throughput next generation sequencing services");
+            lab9.setOverallStatus("Warning");
+            lab9.setActive(true);
+            lab9.setLive(true);
+            lab9.setNextMaintenance(LocalDate.now().plusDays(40));
+            lab9.setMaintenanceDaysLeft(40);
+            lab9.setNotificationPreferences(new NotificationPreferences(true, true, false, false));
+            lab9.setWorkspace(workspace);
+            lab9 = laboratoryRepository.save(lab9);
+
+            if (tempType != null) lab9.getMetricSubscriptions().add(new LabMetricSubscription(lab9, tempType, 18.0, 25.0, true));
+            if (humidityType != null) lab9.getMetricSubscriptions().add(new LabMetricSubscription(lab9, humidityType, 30.0, 60.0, true));
+            lab9 = laboratoryRepository.save(lab9);
+
+            // Lab 10: Microbiology Incubator Zone
+            var lab10 = new Laboratory();
+            lab10.setName("Microbiology Incubator Zone");
+            lab10.setType("Microbiology");
+            lab10.setStatus("Warning");
+            lab10.setBuilding("Building B");
+            lab10.setFloor("Floor 3");
+            lab10.setLabCode("LAB-MICRO-10");
+            lab10.setRoomNumber("304");
+            lab10.setDescription("Controlled culture growing environmental chambers");
+            lab10.setOverallStatus("Warning");
+            lab10.setActive(true);
+            lab10.setLive(true);
+            lab10.setNextMaintenance(LocalDate.now().plusDays(50));
+            lab10.setMaintenanceDaysLeft(50);
+            lab10.setNotificationPreferences(new NotificationPreferences(true, false, true, false));
+            lab10.setWorkspace(workspace);
+            lab10 = laboratoryRepository.save(lab10);
+
+            if (tempType != null) lab10.getMetricSubscriptions().add(new LabMetricSubscription(lab10, tempType, 35.0, 37.5, true));
+            if (humidityType != null) lab10.getMetricSubscriptions().add(new LabMetricSubscription(lab10, humidityType, 80.0, 95.0, true));
+            if (co2Type != null) lab10.getMetricSubscriptions().add(new LabMetricSubscription(lab10, co2Type, 4.0, 6.0, true));
+            lab10 = laboratoryRepository.save(lab10);
+
+            // Lab 11: Toxicology Isolation Suite
+            var lab11 = new Laboratory();
+            lab11.setName("Toxicology Isolation Suite");
+            lab11.setType("Toxicology");
+            lab11.setStatus("Critical");
+            lab11.setBuilding("Building D");
+            lab11.setFloor("Floor 2");
+            lab11.setLabCode("LAB-TOX-11");
+            lab11.setRoomNumber("220");
+            lab11.setDescription("Handling high-potency API and containment materials");
+            lab11.setOverallStatus("Critical");
+            lab11.setActive(true);
+            lab11.setLive(true);
+            lab11.setNextMaintenance(LocalDate.now().plusDays(12));
+            lab11.setMaintenanceDaysLeft(12);
+            lab11.setNotificationPreferences(new NotificationPreferences(true, true, true, true));
+            lab11.setWorkspace(workspace);
+            lab11 = laboratoryRepository.save(lab11);
+
+            if (tempType != null) lab11.getMetricSubscriptions().add(new LabMetricSubscription(lab11, tempType, 18.0, 22.0, true));
+            if (humidityType != null) lab11.getMetricSubscriptions().add(new LabMetricSubscription(lab11, humidityType, 30.0, 50.0, true));
+            if (pressureType != null) lab11.getMetricSubscriptions().add(new LabMetricSubscription(lab11, pressureType, 900.0, 1020.0, true));
+            if (airQualityType != null) lab11.getMetricSubscriptions().add(new LabMetricSubscription(lab11, airQualityType, 0.0, 50.0, true));
+            lab11 = laboratoryRepository.save(lab11);
+
+            // Lab 12: Laser Optics & Physics Lab
+            var lab12 = new Laboratory();
+            lab12.setName("Laser Optics & Physics Lab");
+            lab12.setType("Physics Labs");
+            lab12.setStatus("Operational");
+            lab12.setBuilding("Building C");
+            lab12.setFloor("Floor 2");
+            lab12.setLabCode("LAB-PHYS-12");
+            lab12.setRoomNumber("210");
+            lab12.setDescription("Ultra-precise vibration isolated optical platforms");
+            lab12.setOverallStatus("Operational");
+            lab12.setActive(true);
+            lab12.setLive(true);
+            lab12.setNextMaintenance(LocalDate.now().plusDays(75));
+            lab12.setMaintenanceDaysLeft(75);
+            lab12.setNotificationPreferences(new NotificationPreferences(true, true, false, false));
+            lab12.setWorkspace(workspace);
+            lab12 = laboratoryRepository.save(lab12);
+
+            if (tempType != null) lab12.getMetricSubscriptions().add(new LabMetricSubscription(lab12, tempType, 19.0, 22.0, true));
+            if (vibrationType != null) lab12.getMetricSubscriptions().add(new LabMetricSubscription(lab12, vibrationType, 0.0, 3.0, true));
+            if (airQualityType != null) lab12.getMetricSubscriptions().add(new LabMetricSubscription(lab12, airQualityType, 0.0, 50.0, true));
+            lab12 = laboratoryRepository.save(lab12);
+
             // 9. Grant profile explicit access to all laboratories
             profile.getLabAccesses().clear();
             profile = userProfileRepository.save(profile);
 
-            List<Laboratory> allLabs = List.of(lab1, lab2, lab3, lab4);
+            List<Laboratory> allLabs = List.of(lab1, lab2, lab3, lab4, lab5, lab6, lab7, lab8, lab9, lab10, lab11, lab12);
             for (var lab : allLabs) {
                 var labAccess = new LabUserAccess();
                 labAccess.setUserProfile(profile);
@@ -323,7 +516,7 @@ public class TemporarySeeder implements CommandLineRunner {
                 profile.getLabAccesses().add(labAccess);
             }
             profile = userProfileRepository.save(profile);
-            logger.info("Assigned LabUserAccess to profile for all 4 laboratories.");
+            logger.info("Assigned LabUserAccess to profile for all 12 laboratories.");
 
             // 10. Seed Equipment Thresholds
             var eq1 = equipmentThresholdRepository.save(new EquipmentThreshold(lab1, "ULT Freezer F-07", "biotech", -86.0, -75.0, -78.0, "°C", -80.2, "normal"));
@@ -332,6 +525,14 @@ public class TemporarySeeder implements CommandLineRunner {
             var eq4 = equipmentThresholdRepository.save(new EquipmentThreshold(lab2, "Reactor R-02", "industrial", 0.0, 3.0, 2.0, "mm/s", 3.5, "warning")); // vibration warning!
             var eq5 = equipmentThresholdRepository.save(new EquipmentThreshold(lab3, "LN2 Tank Cryo-01", "biotech", -200.0, -180.0, -185.0, "°C", -170.0, "critical")); // critical breach!
             var eq6 = equipmentThresholdRepository.save(new EquipmentThreshold(lab4, "GC-MS Column Oven", "analytical", 30.0, 350.0, 300.0, "°C", 150.0, "normal"));
+            var eq7 = equipmentThresholdRepository.save(new EquipmentThreshold(lab5, "PCR Thermocycler T-12", "biotech", 4.0, 98.0, 95.0, "°C", 94.8, "normal"));
+            var eq8 = equipmentThresholdRepository.save(new EquipmentThreshold(lab6, "HEPA Filtration Unit H-1", "industrial", 50.0, 150.0, 120.0, "Pa", 45.0, "critical")); // breach!
+            var eq9 = equipmentThresholdRepository.save(new EquipmentThreshold(lab7, "Gamma Counter GC-03", "analytical", 0.0, 100.0, 80.0, "cpm", 12.0, "normal"));
+            var eq10 = equipmentThresholdRepository.save(new EquipmentThreshold(lab8, "Granulator G-08", "industrial", 10.0, 50.0, 40.0, "rpm", 43.0, "warning")); // warning!
+            var eq11 = equipmentThresholdRepository.save(new EquipmentThreshold(lab9, "Sequencer Seq-02", "biotech", 18.0, 25.0, 22.0, "°C", 26.5, "warning")); // breach/warning!
+            var eq12 = equipmentThresholdRepository.save(new EquipmentThreshold(lab10, "Anaerobic Chamber AC-1", "biotech", 0.0, 5.0, 2.0, "%O2", 4.8, "warning")); // warning!
+            var eq13 = equipmentThresholdRepository.save(new EquipmentThreshold(lab11, "Fume Hood F-09", "industrial", 0.3, 0.8, 0.5, "m/s", 0.2, "critical")); // breach!
+            var eq14 = equipmentThresholdRepository.save(new EquipmentThreshold(lab12, "Optical Table OT-04", "industrial", 0.0, 3.0, 2.0, "mm/s", 3.2, "warning")); // warning!
             logger.info("Equipment thresholds seeded.");
 
             // 11. Seed Sensors
@@ -430,6 +631,174 @@ public class TemporarySeeder implements CommandLineRunner {
             sensor8.setLaboratory(lab4);
             sensor8.setEquipment(eq6);
             sensor8 = sensorConfigurationRepository.save(sensor8);
+
+            var sensor9 = new SensorConfiguration();
+            sensor9.setSensorName("Sensor T-09");
+            sensor9.setType("temperature");
+            sensor9.setUnit("MAC-T09-MOLB");
+            sensor9.setActive(true);
+            sensor9.setStatus("ONLINE");
+            sensor9.setCalibrationDate(LocalDate.now().minusMonths(2));
+            sensor9.setLastConnected(LocalDateTime.now().minusMinutes(3));
+            sensor9.setLaboratory(lab5);
+            sensor9.setEquipment(eq7);
+            sensor9 = sensorConfigurationRepository.save(sensor9);
+
+            var sensor10 = new SensorConfiguration();
+            sensor10.setSensorName("Sensor H-10");
+            sensor10.setType("humidity");
+            sensor10.setUnit("MAC-H10-MOLB");
+            sensor10.setActive(true);
+            sensor10.setStatus("ONLINE");
+            sensor10.setCalibrationDate(LocalDate.now().minusMonths(3));
+            sensor10.setLastConnected(LocalDateTime.now().minusMinutes(5));
+            sensor10.setLaboratory(lab5);
+            sensor10.setEquipment(null);
+            sensor10 = sensorConfigurationRepository.save(sensor10);
+
+            var sensor11 = new SensorConfiguration();
+            sensor11.setSensorName("Sensor P-11");
+            sensor11.setType("pressure");
+            sensor11.setUnit("MAC-P11-CLEAN");
+            sensor11.setActive(true);
+            sensor11.setStatus("ONLINE");
+            sensor11.setCalibrationDate(LocalDate.now().minusMonths(1));
+            sensor11.setLastConnected(LocalDateTime.now().minusMinutes(1));
+            sensor11.setLaboratory(lab6);
+            sensor11.setEquipment(eq8);
+            sensor11 = sensorConfigurationRepository.save(sensor11);
+
+            var sensor12 = new SensorConfiguration();
+            sensor12.setSensorName("Sensor A-12");
+            sensor12.setType("air_quality");
+            sensor12.setUnit("MAC-A12-CLEAN");
+            sensor12.setActive(true);
+            sensor12.setStatus("ONLINE");
+            sensor12.setCalibrationDate(LocalDate.now().minusMonths(4));
+            sensor12.setLastConnected(LocalDateTime.now().minusMinutes(2));
+            sensor12.setLaboratory(lab6);
+            sensor12.setEquipment(null);
+            sensor12 = sensorConfigurationRepository.save(sensor12);
+
+            var sensor13 = new SensorConfiguration();
+            sensor13.setSensorName("Sensor T-13");
+            sensor13.setType("temperature");
+            sensor13.setUnit("MAC-T13-RAD");
+            sensor13.setActive(true);
+            sensor13.setStatus("ONLINE");
+            sensor13.setCalibrationDate(LocalDate.now().minusMonths(5));
+            sensor13.setLastConnected(LocalDateTime.now().minusMinutes(6));
+            sensor13.setLaboratory(lab7);
+            sensor13.setEquipment(eq9);
+            sensor13 = sensorConfigurationRepository.save(sensor13);
+
+            var sensor14 = new SensorConfiguration();
+            sensor14.setSensorName("Sensor P-14");
+            sensor14.setType("pressure");
+            sensor14.setUnit("MAC-P14-RAD");
+            sensor14.setActive(true);
+            sensor14.setStatus("ONLINE");
+            sensor14.setCalibrationDate(LocalDate.now().minusMonths(2));
+            sensor14.setLastConnected(LocalDateTime.now().minusMinutes(4));
+            sensor14.setLaboratory(lab7);
+            sensor14.setEquipment(null);
+            sensor14 = sensorConfigurationRepository.save(sensor14);
+
+            var sensor15 = new SensorConfiguration();
+            sensor15.setSensorName("Sensor T-15");
+            sensor15.setType("temperature");
+            sensor15.setUnit("MAC-T15-PHARM");
+            sensor15.setActive(true);
+            sensor15.setStatus("ONLINE");
+            sensor15.setCalibrationDate(LocalDate.now().minusMonths(3));
+            sensor15.setLastConnected(LocalDateTime.now().minusMinutes(2));
+            sensor15.setLaboratory(lab8);
+            sensor15.setEquipment(null);
+            sensor15 = sensorConfigurationRepository.save(sensor15);
+
+            var sensor16 = new SensorConfiguration();
+            sensor16.setSensorName("Sensor C-16");
+            sensor16.setType("co2");
+            sensor16.setUnit("MAC-C16-PHARM");
+            sensor16.setActive(true);
+            sensor16.setStatus("ONLINE");
+            sensor16.setCalibrationDate(LocalDate.now().minusMonths(4));
+            sensor16.setLastConnected(LocalDateTime.now().minusMinutes(3));
+            sensor16.setLaboratory(lab8);
+            sensor16.setEquipment(eq10);
+            sensor16 = sensorConfigurationRepository.save(sensor16);
+
+            var sensor17 = new SensorConfiguration();
+            sensor17.setSensorName("Sensor T-17");
+            sensor17.setType("temperature");
+            sensor17.setUnit("MAC-T17-GENE");
+            sensor17.setActive(true);
+            sensor17.setStatus("ONLINE");
+            sensor17.setCalibrationDate(LocalDate.now().minusMonths(1));
+            sensor17.setLastConnected(LocalDateTime.now().minusMinutes(1));
+            sensor17.setLaboratory(lab9);
+            sensor17.setEquipment(eq11);
+            sensor17 = sensorConfigurationRepository.save(sensor17);
+
+            var sensor18 = new SensorConfiguration();
+            sensor18.setSensorName("Sensor T-18");
+            sensor18.setType("temperature");
+            sensor18.setUnit("MAC-T18-MICRO");
+            sensor18.setActive(true);
+            sensor18.setStatus("ONLINE");
+            sensor18.setCalibrationDate(LocalDate.now().minusMonths(2));
+            sensor18.setLastConnected(LocalDateTime.now().minusMinutes(2));
+            sensor18.setLaboratory(lab10);
+            sensor18.setEquipment(eq12);
+            sensor18 = sensorConfigurationRepository.save(sensor18);
+
+            var sensor19 = new SensorConfiguration();
+            sensor19.setSensorName("Sensor A-19");
+            sensor19.setType("air_quality");
+            sensor19.setUnit("MAC-A19-TOX");
+            sensor19.setActive(true);
+            sensor19.setStatus("ONLINE");
+            sensor19.setCalibrationDate(LocalDate.now().minusMonths(3));
+            sensor19.setLastConnected(LocalDateTime.now().minusMinutes(1));
+            sensor19.setLaboratory(lab11);
+            sensor19.setEquipment(eq13);
+            sensor19 = sensorConfigurationRepository.save(sensor19);
+
+            var sensor20 = new SensorConfiguration();
+            sensor20.setSensorName("Sensor P-20");
+            sensor20.setType("pressure");
+            sensor20.setUnit("MAC-P20-TOX");
+            sensor20.setActive(true);
+            sensor20.setStatus("ONLINE");
+            sensor20.setCalibrationDate(LocalDate.now().minusMonths(1));
+            sensor20.setLastConnected(LocalDateTime.now().minusMinutes(2));
+            sensor20.setLaboratory(lab11);
+            sensor20.setEquipment(null);
+            sensor20 = sensorConfigurationRepository.save(sensor20);
+
+            var sensor21 = new SensorConfiguration();
+            sensor21.setSensorName("Sensor V-21");
+            sensor21.setType("vibration");
+            sensor21.setUnit("MAC-V21-PHYS");
+            sensor21.setActive(true);
+            sensor21.setStatus("ONLINE");
+            sensor21.setCalibrationDate(LocalDate.now().minusMonths(2));
+            sensor21.setLastConnected(LocalDateTime.now().minusMinutes(4));
+            sensor21.setLaboratory(lab12);
+            sensor21.setEquipment(eq14);
+            sensor21 = sensorConfigurationRepository.save(sensor21);
+
+            var sensor22 = new SensorConfiguration();
+            sensor22.setSensorName("Sensor T-22");
+            sensor22.setType("temperature");
+            sensor22.setUnit("MAC-T22-PHYS");
+            sensor22.setActive(true);
+            sensor22.setStatus("ONLINE");
+            sensor22.setCalibrationDate(LocalDate.now().minusMonths(6));
+            sensor22.setLastConnected(LocalDateTime.now().minusMinutes(10));
+            sensor22.setLaboratory(lab12);
+            sensor22.setEquipment(null);
+            sensor22 = sensorConfigurationRepository.save(sensor22);
 
             logger.info("Sensors configured and seeded.");
 
@@ -573,6 +942,214 @@ public class TemporarySeeder implements CommandLineRunner {
             lab4.getMetrics().addAll(List.of(lm10, lm11));
             laboratoryRepository.save(lab4);
 
+            // Lab 5 Metrics
+            var lm12 = new LabMetric();
+            lm12.setLaboratory(lab5);
+            lm12.setName("temperature");
+            lm12.setValue("22.10");
+            lm12.setUnit("°C");
+            lm12.setStatus("NORMAL");
+            lm12.setIcon("device_thermostat");
+            lm12.setSparkline("21.8,22.0,22.1");
+            lm12.setThreshold(null);
+            lm12.setObjectType("Ambient");
+
+            var lm13 = new LabMetric();
+            lm13.setLaboratory(lab5);
+            lm13.setName("humidity");
+            lm13.setValue("45.00");
+            lm13.setUnit("%");
+            lm13.setStatus("NORMAL");
+            lm13.setIcon("water_drop");
+            lm13.setSparkline("44.5,45.0,45.2");
+            lm13.setThreshold(null);
+            lm13.setObjectType("Ambient");
+
+            lab5.getMetrics().addAll(List.of(lm12, lm13));
+            laboratoryRepository.save(lab5);
+
+            // Lab 6 Metrics
+            var lm14 = new LabMetric();
+            lm14.setLaboratory(lab6);
+            lm14.setName("pressure");
+            lm14.setValue("45.00");
+            lm14.setUnit("Pa");
+            lm14.setStatus("CRITICAL");
+            lm14.setIcon("compress");
+            lm14.setSparkline("110.0,90.0,70.0,45.0");
+            lm14.setThreshold(50.0);
+            lm14.setObjectType("HEPA Filtration Unit H-1");
+
+            var lm15 = new LabMetric();
+            lm15.setLaboratory(lab6);
+            lm15.setName("air_quality");
+            lm15.setValue("75.00");
+            lm15.setUnit("AQI");
+            lm15.setStatus("CRITICAL");
+            lm15.setIcon("air");
+            lm15.setSparkline("15.0,30.0,55.0,75.0");
+            lm15.setThreshold(50.0);
+            lm15.setObjectType("Ambient");
+
+            lab6.getMetrics().addAll(List.of(lm14, lm15));
+            laboratoryRepository.save(lab6);
+
+            // Lab 7 Metrics
+            var lm16 = new LabMetric();
+            lm16.setLaboratory(lab7);
+            lm16.setName("temperature");
+            lm16.setValue("20.00");
+            lm16.setUnit("°C");
+            lm16.setStatus("NORMAL");
+            lm16.setIcon("device_thermostat");
+            lm16.setSparkline("19.8,20.1,20.0");
+            lm16.setThreshold(null);
+            lm16.setObjectType("Ambient");
+
+            var lm17 = new LabMetric();
+            lm17.setLaboratory(lab7);
+            lm17.setName("pressure");
+            lm17.setValue("940.00");
+            lm17.setUnit("hPa");
+            lm17.setStatus("WARNING");
+            lm17.setIcon("compress");
+            lm17.setSparkline("960.0,950.0,940.0");
+            lm17.setThreshold(950.0);
+            lm17.setObjectType("Ambient");
+
+            lab7.getMetrics().addAll(List.of(lm16, lm17));
+            laboratoryRepository.save(lab7);
+
+            // Lab 8 Metrics
+            var lm18 = new LabMetric();
+            lm18.setLaboratory(lab8);
+            lm18.setName("temperature");
+            lm18.setValue("28.50");
+            lm18.setUnit("°C");
+            lm18.setStatus("CRITICAL");
+            lm18.setIcon("device_thermostat");
+            lm18.setSparkline("22.0,24.0,26.5,28.5");
+            lm18.setThreshold(25.0);
+            lm18.setObjectType("Ambient");
+
+            var lm19 = new LabMetric();
+            lm19.setLaboratory(lab8);
+            lm19.setName("co2");
+            lm19.setValue("1100.00");
+            lm19.setUnit("ppm");
+            lm19.setStatus("WARNING");
+            lm19.setIcon("co2");
+            lm19.setSparkline("800.0,950.0,1100.0");
+            lm19.setThreshold(1000.0);
+            lm19.setObjectType("Granulator G-08");
+
+            lab8.getMetrics().addAll(List.of(lm18, lm19));
+            laboratoryRepository.save(lab8);
+
+            // Lab 9 Metrics
+            var lm20 = new LabMetric();
+            lm20.setLaboratory(lab9);
+            lm20.setName("temperature");
+            lm20.setValue("26.50");
+            lm20.setUnit("°C");
+            lm20.setStatus("WARNING");
+            lm20.setIcon("device_thermostat");
+            lm20.setSparkline("22.0,23.5,25.0,26.5");
+            lm20.setThreshold(25.0);
+            lm20.setObjectType("Sequencer Seq-02");
+
+            var lm21 = new LabMetric();
+            lm21.setLaboratory(lab9);
+            lm21.setName("humidity");
+            lm21.setValue("50.00");
+            lm21.setUnit("%");
+            lm21.setStatus("NORMAL");
+            lm21.setIcon("water_drop");
+            lm21.setSparkline("49.0,50.0,50.2");
+            lm21.setThreshold(null);
+            lm21.setObjectType("Ambient");
+
+            lab9.getMetrics().addAll(List.of(lm20, lm21));
+            laboratoryRepository.save(lab9);
+
+            // Lab 10 Metrics
+            var lm22 = new LabMetric();
+            lm22.setLaboratory(lab10);
+            lm22.setName("temperature");
+            lm22.setValue("38.50");
+            lm22.setUnit("°C");
+            lm22.setStatus("WARNING");
+            lm22.setIcon("device_thermostat");
+            lm22.setSparkline("37.0,37.5,38.5");
+            lm22.setThreshold(37.5);
+            lm22.setObjectType("Anaerobic Chamber AC-1");
+
+            var lm23 = new LabMetric();
+            lm23.setLaboratory(lab10);
+            lm23.setName("co2");
+            lm23.setValue("5.00");
+            lm23.setUnit("%");
+            lm23.setStatus("NORMAL");
+            lm23.setIcon("co2");
+            lm23.setSparkline("4.8,4.9,5.0");
+            lm23.setThreshold(null);
+            lm23.setObjectType("Ambient");
+
+            lab10.getMetrics().addAll(List.of(lm22, lm23));
+            laboratoryRepository.save(lab10);
+
+            // Lab 11 Metrics
+            var lm24 = new LabMetric();
+            lm24.setLaboratory(lab11);
+            lm24.setName("air_quality");
+            lm24.setValue("120.00");
+            lm24.setUnit("AQI");
+            lm24.setStatus("CRITICAL");
+            lm24.setIcon("air");
+            lm24.setSparkline("40.0,65.0,90.0,120.0");
+            lm24.setThreshold(50.0);
+            lm24.setObjectType("Fume Hood F-09");
+
+            var lm25 = new LabMetric();
+            lm25.setLaboratory(lab11);
+            lm25.setName("pressure");
+            lm25.setValue("850.00");
+            lm25.setUnit("hPa");
+            lm25.setStatus("CRITICAL");
+            lm25.setIcon("compress");
+            lm25.setSparkline("960.0,910.0,850.0");
+            lm25.setThreshold(900.0);
+            lm25.setObjectType("Ambient");
+
+            lab11.getMetrics().addAll(List.of(lm24, lm25));
+            laboratoryRepository.save(lab11);
+
+            // Lab 12 Metrics
+            var lm26 = new LabMetric();
+            lm26.setLaboratory(lab12);
+            lm26.setName("temperature");
+            lm26.setValue("21.00");
+            lm26.setUnit("°C");
+            lm26.setStatus("NORMAL");
+            lm26.setIcon("device_thermostat");
+            lm26.setSparkline("20.9,21.0,21.1");
+            lm26.setThreshold(null);
+            lm26.setObjectType("Ambient");
+
+            var lm27 = new LabMetric();
+            lm27.setLaboratory(lab12);
+            lm27.setName("vibration");
+            lm27.setValue("3.20");
+            lm27.setUnit("mm/s");
+            lm27.setStatus("WARNING");
+            lm27.setIcon("graphic_eq");
+            lm27.setSparkline("1.0,1.5,2.4,3.2");
+            lm27.setThreshold(3.0);
+            lm27.setObjectType("Optical Table OT-04");
+
+            lab12.getMetrics().addAll(List.of(lm26, lm27));
+            laboratoryRepository.save(lab12);
+
             // 12. Seed rich historical metrics readings (last 48 hours, 1-hour intervals)
             var now = LocalDateTime.now();
             List<SensorReading> readingsToSave = new ArrayList<>();
@@ -640,6 +1217,120 @@ public class TemporarySeeder implements CommandLineRunner {
                 }
                 if (vibrationType != null) {
                     readingsToSave.add(new SensorReading(sensor7, lab2, vibrationType, val7, recordedAt));
+                }
+
+                // Sensor 9: Temp in Lab 5 (normal)
+                double val9 = 22.0 + Math.sin(i * 0.3) * 1.0;
+                if (tempType != null) {
+                    readingsToSave.add(new SensorReading(sensor9, lab5, tempType, val9, recordedAt));
+                }
+
+                // Sensor 10: Humidity in Lab 5 (normal)
+                double val10 = 45.0 + Math.cos(i * 0.2) * 5.0;
+                if (humidityType != null) {
+                    readingsToSave.add(new SensorReading(sensor10, lab5, humidityType, val10, recordedAt));
+                }
+
+                // Sensor 11: Pressure in Lab 6 (critical drop recently, last 5 hours)
+                double val11 = 120.0 + Math.sin(i * 0.1) * 10.0;
+                if (i <= 5) {
+                    val11 = 45.0; // Trigger critical alarm
+                }
+                if (pressureType != null) {
+                    readingsToSave.add(new SensorReading(sensor11, lab6, pressureType, val11, recordedAt));
+                }
+
+                // Sensor 12: Air Quality in Lab 6 (critical spike, last 4 hours)
+                double val12 = 15.0 + Math.cos(i * 0.3) * 5.0;
+                if (i <= 4) {
+                    val12 = 75.0; // Trigger critical alarm
+                }
+                if (airQualityType != null) {
+                    readingsToSave.add(new SensorReading(sensor12, lab6, airQualityType, val12, recordedAt));
+                }
+
+                // Sensor 13: Temp in Lab 7 (normal)
+                double val13 = 20.0 + Math.sin(i * 0.4) * 0.8;
+                if (tempType != null) {
+                    readingsToSave.add(new SensorReading(sensor13, lab7, tempType, val13, recordedAt));
+                }
+
+                // Sensor 14: Pressure in Lab 7 (warning drop, last 8 hours)
+                double val14 = 990.0 + Math.sin(i * 0.2) * 15.0;
+                if (i <= 8) {
+                    val14 = 940.0; // Trigger warning alarm
+                }
+                if (pressureType != null) {
+                    readingsToSave.add(new SensorReading(sensor14, lab7, pressureType, val14, recordedAt));
+                }
+
+                // Sensor 15: Temp in Lab 8 (critical temperature spike, last 6 hours)
+                double val15 = 20.0 + Math.cos(i * 0.3) * 2.0;
+                if (i <= 6) {
+                    val15 = 28.5; // Trigger critical alarm
+                }
+                if (tempType != null) {
+                    readingsToSave.add(new SensorReading(sensor15, lab8, tempType, val15, recordedAt));
+                }
+
+                // Sensor 16: CO2 in Lab 8 (warning CO2 spike, last 7 hours)
+                double val16 = 600.0 + Math.sin(i * 0.25) * 100.0;
+                if (i <= 7) {
+                    val16 = 1100.0; // Trigger warning alarm
+                }
+                if (co2Type != null) {
+                    readingsToSave.add(new SensorReading(sensor16, lab8, co2Type, val16, recordedAt));
+                }
+
+                // Sensor 17: Temp in Lab 9 (warning temp spike, last 9 hours)
+                double val17 = 21.0 + Math.cos(i * 0.35) * 1.5;
+                if (i <= 9) {
+                    val17 = 26.5; // Trigger warning alarm
+                }
+                if (tempType != null) {
+                    readingsToSave.add(new SensorReading(sensor17, lab9, tempType, val17, recordedAt));
+                }
+
+                // Sensor 18: Temp in Lab 10 (warning temp spike, last 10 hours)
+                double val18 = 36.5 + Math.sin(i * 0.4) * 0.5;
+                if (i <= 10) {
+                    val18 = 38.5; // Trigger warning alarm
+                }
+                if (tempType != null) {
+                    readingsToSave.add(new SensorReading(sensor18, lab10, tempType, val18, recordedAt));
+                }
+
+                // Sensor 19: Air Quality in Lab 11 (critical spike, last 3 hours)
+                double val19 = 25.0 + Math.cos(i * 0.3) * 8.0;
+                if (i <= 3) {
+                    val19 = 120.0; // Trigger critical alarm
+                }
+                if (airQualityType != null) {
+                    readingsToSave.add(new SensorReading(sensor19, lab11, airQualityType, val19, recordedAt));
+                }
+
+                // Sensor 20: Pressure in Lab 11 (critical drop, last 4 hours)
+                double val20 = 980.0 + Math.sin(i * 0.15) * 10.0;
+                if (i <= 4) {
+                    val20 = 850.0; // Trigger critical alarm
+                }
+                if (pressureType != null) {
+                    readingsToSave.add(new SensorReading(sensor20, lab11, pressureType, val20, recordedAt));
+                }
+
+                // Sensor 21: Vibration in Lab 12 (warning spike, last 12 hours)
+                double val21 = 1.0 + Math.abs(Math.sin(i * 0.4)) * 0.8;
+                if (i <= 12) {
+                    val21 = 3.2; // Trigger warning alarm
+                }
+                if (vibrationType != null) {
+                    readingsToSave.add(new SensorReading(sensor21, lab12, vibrationType, val21, recordedAt));
+                }
+
+                // Sensor 22: Temp in Lab 12 (normal)
+                double val22 = 20.5 + Math.cos(i * 0.2) * 0.5;
+                if (tempType != null) {
+                    readingsToSave.add(new SensorReading(sensor22, lab12, tempType, val22, recordedAt));
                 }
             }
             sensorReadingRepository.saveAll(readingsToSave);
@@ -753,6 +1444,267 @@ public class TemporarySeeder implements CommandLineRunner {
             ));
             alertRepository.save(alert5);
 
+            // Alert 6: HEPA Filter Pressure Failure (Critical, Active, Lab 6)
+            var alert6 = new Alert();
+            alert6.setLaboratory(lab6);
+            alert6.setSensorConfiguration(sensor11);
+            alert6.setTitle("HEPA Filter Pressure Failure");
+            alert6.setDescription("Sensor P-11 registered 45.0 Pa in HEPA Filtration Unit H-1, below the minimum differential pressure of 50.0 Pa.");
+            alert6.setSeverity("CRITICAL");
+            alert6.setStatus("ACTIVE");
+            alert6.setLabName(lab6.getName());
+            alert6.setTimeAgo("5 hours ago");
+            alert6 = alertRepository.save(alert6);
+
+            alert6.getMetrics().addAll(List.of(
+                new AlertMetric(alert6, "currentValue", "45.0 Pa"),
+                new AlertMetric(alert6, "threshold", "50.0 Pa"),
+                new AlertMetric(alert6, "exceededBy", "-5.0 Pa"),
+                new AlertMetric(alert6, "sensorType", "Differential Pressure Transducer"),
+                new AlertMetric(alert6, "lastCalibration", LocalDate.now().minusMonths(1).toString()),
+                new AlertMetric(alert6, "networkStatus", "ONLINE")
+            ));
+            alertRepository.save(alert6);
+
+            // Alert 7: Clean Room Air Quality Hazard (Critical, Active, Lab 6)
+            var alert7 = new Alert();
+            alert7.setLaboratory(lab6);
+            alert7.setSensorConfiguration(sensor12);
+            alert7.setTitle("Clean Room Air Quality Hazard");
+            alert7.setDescription("Sensor A-12 registered 75.0 AQI in Clean Room Class 100, exceeding the strict room limit of 50.0 AQI.");
+            alert7.setSeverity("CRITICAL");
+            alert7.setStatus("ACTIVE");
+            alert7.setLabName(lab6.getName());
+            alert7.setTimeAgo("4 hours ago");
+            alert7 = alertRepository.save(alert7);
+
+            alert7.getMetrics().addAll(List.of(
+                new AlertMetric(alert7, "currentValue", "75.0 AQI"),
+                new AlertMetric(alert7, "threshold", "50.0 AQI"),
+                new AlertMetric(alert7, "exceededBy", "25.0 AQI"),
+                new AlertMetric(alert7, "sensorType", "Particulate Matter Laser Counter"),
+                new AlertMetric(alert7, "lastCalibration", LocalDate.now().minusMonths(4).toString()),
+                new AlertMetric(alert7, "networkStatus", "ONLINE")
+            ));
+            alertRepository.save(alert7);
+
+            // Alert 8: Toxic Gas/Air Quality Spill (Critical, Active, Lab 11)
+            var alert8 = new Alert();
+            alert8.setLaboratory(lab11);
+            alert8.setSensorConfiguration(sensor19);
+            alert8.setTitle("Toxic Gas Air Quality Spike");
+            alert8.setDescription("Sensor A-19 registered 120.0 AQI in Fume Hood F-09, indicating a potential volatile organic compound leak.");
+            alert8.setSeverity("CRITICAL");
+            alert8.setStatus("ACTIVE");
+            alert8.setLabName(lab11.getName());
+            alert8.setTimeAgo("3 hours ago");
+            alert8 = alertRepository.save(alert8);
+
+            alert8.getMetrics().addAll(List.of(
+                new AlertMetric(alert8, "currentValue", "120.0 AQI"),
+                new AlertMetric(alert8, "threshold", "50.0 AQI"),
+                new AlertMetric(alert8, "exceededBy", "70.0 AQI"),
+                new AlertMetric(alert8, "sensorType", "Metal Oxide Gas Sensor"),
+                new AlertMetric(alert8, "lastCalibration", LocalDate.now().minusMonths(3).toString()),
+                new AlertMetric(alert8, "networkStatus", "ONLINE")
+            ));
+            alertRepository.save(alert8);
+
+            // Alert 9: Negative Pressure Loss (Critical, Active, Lab 11)
+            var alert9 = new Alert();
+            alert9.setLaboratory(lab11);
+            alert9.setSensorConfiguration(sensor20);
+            alert9.setTitle("Negative Pressure Containment Loss");
+            alert9.setDescription("Sensor P-20 registered 850.0 hPa, warmer/higher than negative pressure critical threshold of 900.0 hPa.");
+            alert9.setSeverity("CRITICAL");
+            alert9.setStatus("ACTIVE");
+            alert9.setLabName(lab11.getName());
+            alert9.setTimeAgo("4 hours ago");
+            alert9 = alertRepository.save(alert9);
+
+            alert9.getMetrics().addAll(List.of(
+                new AlertMetric(alert9, "currentValue", "850.0 hPa"),
+                new AlertMetric(alert9, "threshold", "900.0 hPa"),
+                new AlertMetric(alert9, "exceededBy", "-50.0 hPa"),
+                new AlertMetric(alert9, "sensorType", "Barometric Pressure Sensor"),
+                new AlertMetric(alert9, "lastCalibration", LocalDate.now().minusMonths(1).toString()),
+                new AlertMetric(alert9, "networkStatus", "ONLINE")
+            ));
+            alertRepository.save(alert9);
+
+            // Alert 10: Incubator Temperature Deviation (Warning, Active, Lab 10)
+            var alert10 = new Alert();
+            alert10.setLaboratory(lab10);
+            alert10.setSensorConfiguration(sensor18);
+            alert10.setTitle("Incubator Temperature Deviation");
+            alert10.setDescription("Sensor T-18 registered 38.5°C in Anaerobic Chamber AC-1, exceeding warning threshold of 37.5°C.");
+            alert10.setSeverity("WARNING");
+            alert10.setStatus("ACTIVE");
+            alert10.setLabName(lab10.getName());
+            alert10.setTimeAgo("10 hours ago");
+            alert10 = alertRepository.save(alert10);
+
+            alert10.getMetrics().addAll(List.of(
+                new AlertMetric(alert10, "currentValue", "38.5°C"),
+                new AlertMetric(alert10, "threshold", "37.5°C"),
+                new AlertMetric(alert10, "exceededBy", "1.0°C"),
+                new AlertMetric(alert10, "sensorType", "RTD Probe"),
+                new AlertMetric(alert10, "lastCalibration", LocalDate.now().minusMonths(2).toString()),
+                new AlertMetric(alert10, "networkStatus", "ONLINE")
+            ));
+            alertRepository.save(alert10);
+
+            // Alert 11: Vibration Threshold Warning (Warning, Active, Lab 12)
+            var alert11 = new Alert();
+            alert11.setLaboratory(lab12);
+            alert11.setSensorConfiguration(sensor21);
+            alert11.setTitle("Laser Bench Vibration Warning");
+            alert11.setDescription("Sensor V-21 registered 3.2 mm/s on Optical Table OT-04, exceeding warning limit of 3.0 mm/s.");
+            alert11.setSeverity("WARNING");
+            alert11.setStatus("ACTIVE");
+            alert11.setLabName(lab12.getName());
+            alert11.setTimeAgo("12 hours ago");
+            alert11 = alertRepository.save(alert11);
+
+            alert11.getMetrics().addAll(List.of(
+                new AlertMetric(alert11, "currentValue", "3.2 mm/s"),
+                new AlertMetric(alert11, "threshold", "3.0 mm/s"),
+                new AlertMetric(alert11, "exceededBy", "0.2 mm/s"),
+                new AlertMetric(alert11, "sensorType", "Piezoelectric Accelerometer"),
+                new AlertMetric(alert11, "lastCalibration", LocalDate.now().minusMonths(2).toString())
+            ));
+            alertRepository.save(alert11);
+
+            // Alert 12: Low Room Pressure Warning (Warning, Active, Lab 7)
+            var alert12 = new Alert();
+            alert12.setLaboratory(lab7);
+            alert12.setSensorConfiguration(sensor14);
+            alert12.setTitle("Low Room Pressure Warning");
+            alert12.setDescription("Sensor P-14 registered 940.0 hPa in Radiation Facility, below warning threshold of 950.0 hPa.");
+            alert12.setSeverity("WARNING");
+            alert12.setStatus("ACTIVE");
+            alert12.setLabName(lab7.getName());
+            alert12.setTimeAgo("8 hours ago");
+            alert12 = alertRepository.save(alert12);
+
+            alert12.getMetrics().addAll(List.of(
+                new AlertMetric(alert12, "currentValue", "940.0 hPa"),
+                new AlertMetric(alert12, "threshold", "950.0 hPa"),
+                new AlertMetric(alert12, "exceededBy", "-10.0 hPa")
+            ));
+            alertRepository.save(alert12);
+
+            // Alert 13: Room Temperature Warning (Warning, Active, Lab 9)
+            var alert13 = new Alert();
+            alert13.setLaboratory(lab9);
+            alert13.setSensorConfiguration(sensor17);
+            alert13.setTitle("Sequencing Room Temp Warning");
+            alert13.setDescription("Sensor T-17 registered 26.5°C on Sequencer Seq-02, exceeding warning limit of 25.0°C.");
+            alert13.setSeverity("WARNING");
+            alert13.setStatus("ACTIVE");
+            alert13.setLabName(lab9.getName());
+            alert13.setTimeAgo("9 hours ago");
+            alert13 = alertRepository.save(alert13);
+
+            alert13.getMetrics().addAll(List.of(
+                new AlertMetric(alert13, "currentValue", "26.5°C"),
+                new AlertMetric(alert13, "threshold", "25.0°C"),
+                new AlertMetric(alert13, "exceededBy", "1.5°C")
+            ));
+            alertRepository.save(alert13);
+
+            // Alert 14: Power Interruption Restored (Critical, Resolved, Lab 5)
+            var alert14 = new Alert();
+            alert14.setLaboratory(lab5);
+            alert14.setSensorConfiguration(sensor9);
+            alert14.setTitle("Power Interruption Restored");
+            alert14.setDescription("Primary power grid connection lost but secondary backup generator triggered; main power successfully restored.");
+            alert14.setSeverity("CRITICAL");
+            alert14.setStatus("RESOLVED");
+            alert14.setLabName(lab5.getName());
+            alert14.setTimeAgo("18 hours ago");
+            alert14 = alertRepository.save(alert14);
+
+            alert14.getMetrics().addAll(List.of(
+                new AlertMetric(alert14, "duration", "15 minutes"),
+                new AlertMetric(alert14, "backupStatus", "DISENGAGED"),
+                new AlertMetric(alert14, "currentState", "STABLE")
+            ));
+            alertRepository.save(alert14);
+
+            // Alert 15: Anaerobic O2 Concentration Normalized (Warning, Resolved, Lab 10)
+            var alert15 = new Alert();
+            alert15.setLaboratory(lab10);
+            alert15.setSensorConfiguration(sensor18);
+            alert15.setTitle("O2 Concentration Normalized");
+            alert15.setDescription("O2 concentration exceeded warning threshold of 2.0% but returned to stable 1.5% after chamber flush.");
+            alert15.setSeverity("WARNING");
+            alert15.setStatus("RESOLVED");
+            alert15.setLabName(lab10.getName());
+            alert15.setTimeAgo("1 day ago");
+            alert15 = alertRepository.save(alert15);
+
+            alert15.getMetrics().addAll(List.of(
+                new AlertMetric(alert15, "currentValue", "1.5%"),
+                new AlertMetric(alert15, "exceededValue", "4.8%"),
+                new AlertMetric(alert15, "threshold", "2.0%")
+            ));
+            alertRepository.save(alert15);
+
+            // Alert 16: Incubator Temp Alarm Resolved (Critical, Resolved, Lab 1)
+            var alert16 = new Alert();
+            alert16.setLaboratory(lab1);
+            alert16.setSensorConfiguration(sensor1);
+            alert16.setTitle("Incubator Temp Alarm Resolved");
+            alert16.setDescription("Temperature anomaly resolved. Ambient temp returned to normal range (5.2°C).");
+            alert16.setSeverity("CRITICAL");
+            alert16.setStatus("RESOLVED");
+            alert16.setLabName(lab1.getName());
+            alert16.setTimeAgo("1 day ago");
+            alert16 = alertRepository.save(alert16);
+
+            alert16.getMetrics().addAll(List.of(
+                new AlertMetric(alert16, "currentValue", "5.2°C"),
+                new AlertMetric(alert16, "threshold", "8.0°C")
+            ));
+            alertRepository.save(alert16);
+
+            // Alert 17: Vibration Peak Dampened (Warning, Resolved, Lab 2)
+            var alert17 = new Alert();
+            alert17.setLaboratory(lab2);
+            alert17.setSensorConfiguration(sensor7);
+            alert17.setTitle("Vibration Peak Dampened");
+            alert17.setDescription("Vibration anomaly on Reactor R-02 resolved; current levels stable at 1.2 mm/s.");
+            alert17.setSeverity("WARNING");
+            alert17.setStatus("RESOLVED");
+            alert17.setLabName(lab2.getName());
+            alert17.setTimeAgo("1 day ago");
+            alert17 = alertRepository.save(alert17);
+
+            alert17.getMetrics().addAll(List.of(
+                new AlertMetric(alert17, "currentValue", "1.2 mm/s"),
+                new AlertMetric(alert17, "threshold", "3.0 mm/s")
+            ));
+            alertRepository.save(alert17);
+
+            // Alert 18: Pressure Restored in Cryo Room (Warning, Resolved, Lab 3)
+            var alert18 = new Alert();
+            alert18.setLaboratory(lab3);
+            alert18.setSensorConfiguration(sensor5);
+            alert18.setTitle("Cryo Room Pressure Restored");
+            alert18.setDescription("Pressure sensor fluctuation resolved. Ambient pressure normalized to 1012 hPa.");
+            alert18.setSeverity("WARNING");
+            alert18.setStatus("RESOLVED");
+            alert18.setLabName(lab3.getName());
+            alert18.setTimeAgo("2 days ago");
+            alert18 = alertRepository.save(alert18);
+
+            alert18.getMetrics().addAll(List.of(
+                new AlertMetric(alert18, "currentValue", "1012 hPa"),
+                new AlertMetric(alert18, "threshold", "950 hPa")
+            ));
+            alertRepository.save(alert18);
+
             logger.info("Active and resolved alerts seeded successfully.");
 
             // 14. Seed History Records (Audit Trail)
@@ -767,6 +1719,21 @@ public class TemporarySeeder implements CommandLineRunner {
             historyRecordRepository.save(new HistoryRecord(lab4, "HPLC Column Calibrated", "Analytical GC-MS column successfully calibrated by supervisor.", LocalDateTime.now().minusDays(1).minusHours(4), "maintenance", "Info", "Completed"));
             historyRecordRepository.save(new HistoryRecord(lab3, "Pressure check completed", "Cryo room safety valve inspection successfully completed.", LocalDateTime.now().minusDays(2), "maintenance", "Info", "Completed"));
             historyRecordRepository.save(new HistoryRecord(lab2, "Workspace access updated", "Assigned Operator role access permissions to SafeLab Operator.", LocalDateTime.now().minusDays(2).minusHours(1), "system", "Info", "Completed"));
+            historyRecordRepository.save(new HistoryRecord(lab6, "HEPA Filter Pressure Failure", "Sensor P-11 registered 45.0 Pa (Limit: 50.0 Pa) in Clean Room.", LocalDateTime.now().minusHours(5), "incident", "Critical", "Active"));
+            historyRecordRepository.save(new HistoryRecord(lab6, "Clean Room Air Quality Hazard", "Sensor A-12 registered 75.0 AQI (Limit: 50.0 AQI).", LocalDateTime.now().minusHours(4), "incident", "Critical", "Active"));
+            historyRecordRepository.save(new HistoryRecord(lab11, "Toxic Gas Air Quality Spike", "Sensor A-19 registered 120.0 AQI (Limit: 50.0 AQI) in Fume Hood.", LocalDateTime.now().minusHours(3), "incident", "Critical", "Active"));
+            historyRecordRepository.save(new HistoryRecord(lab11, "Negative Pressure Containment Loss", "Sensor P-20 registered 850.0 hPa (Limit: 900.0 hPa).", LocalDateTime.now().minusHours(4), "incident", "Critical", "Active"));
+            historyRecordRepository.save(new HistoryRecord(lab10, "Incubator Temperature Deviation", "Sensor T-18 registered 38.5°C (Limit: 37.5°C) in AC-1.", LocalDateTime.now().minusHours(10), "incident", "Warning", "Active"));
+            historyRecordRepository.save(new HistoryRecord(lab12, "Laser Bench Vibration Warning", "Sensor V-21 registered 3.2 mm/s on Optical Table.", LocalDateTime.now().minusHours(12), "incident", "Warning", "Active"));
+            historyRecordRepository.save(new HistoryRecord(lab7, "Low Room Pressure Warning", "Sensor P-14 registered 940.0 hPa in Radiation Facility.", LocalDateTime.now().minusHours(8), "incident", "Warning", "Active"));
+            historyRecordRepository.save(new HistoryRecord(lab9, "Sequencing Room Temp Warning", "Sensor T-17 registered 26.5°C (Limit: 25.0°C).", LocalDateTime.now().minusHours(9), "incident", "Warning", "Active"));
+            historyRecordRepository.save(new HistoryRecord(lab5, "Power Interruption Resolved", "Backup generator disengaged, grid power restored successfully.", LocalDateTime.now().minusHours(18), "incident", "Info", "Resolved"));
+            historyRecordRepository.save(new HistoryRecord(lab10, "O2 Concentration Normalized", "Oxygen levels returned to normal 1.5%.", LocalDateTime.now().minusDays(1), "incident", "Info", "Resolved"));
+            historyRecordRepository.save(new HistoryRecord(lab1, "Incubator Temp Alarm Resolved", "Temperature returned to normal range (5.2°C).", LocalDateTime.now().minusDays(1), "incident", "Info", "Resolved"));
+            historyRecordRepository.save(new HistoryRecord(lab2, "Vibration Peak Dampened", "Vibration level stabilized at 1.2 mm/s on Reactor.", LocalDateTime.now().minusDays(1), "incident", "Info", "Resolved"));
+            historyRecordRepository.save(new HistoryRecord(lab3, "Cryo Room Pressure Restored", "Flashing pressure resolved, stabilized at 1012 hPa.", LocalDateTime.now().minusDays(2), "incident", "Info", "Resolved"));
+            historyRecordRepository.save(new HistoryRecord(lab5, "PCR Thermocycler Inspection", "Routine safety review completed on PCR Thermocycler T-12.", LocalDateTime.now().minusHours(14), "maintenance", "Info", "Completed"));
+            historyRecordRepository.save(new HistoryRecord(lab6, "HEPA Filter Replacement", "HEPA primary stage filters scheduled for replacement next week.", LocalDateTime.now().minusDays(2), "maintenance", "Info", "Scheduled"));
             logger.info("History records seeded successfully.");
         }
     }
