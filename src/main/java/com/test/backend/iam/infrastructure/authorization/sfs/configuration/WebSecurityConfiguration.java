@@ -72,7 +72,9 @@ public class WebSecurityConfiguration {
                                 "/api/v1/telemetry/simulate",
                                 "/v3/api-docs/**",
                                 "/swagger-ui/**",
-                                "/swagger-ui.html"
+                                "/swagger-ui.html",
+                                "/swagger/index.html",
+                                "/swagger/**"
                         ).permitAll()
                         .anyRequest().authenticated());
 
