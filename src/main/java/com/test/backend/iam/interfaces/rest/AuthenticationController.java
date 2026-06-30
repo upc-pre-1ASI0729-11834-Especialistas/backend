@@ -11,6 +11,7 @@ import com.test.backend.iam.interfaces.rest.transform.AuthenticatedUserResourceF
 import com.test.backend.iam.interfaces.rest.transform.SignInCommandFromResourceAssembler;
 import com.test.backend.iam.interfaces.rest.transform.SignUpCommandFromResourceAssembler;
 import com.test.backend.iam.interfaces.rest.transform.UserResourceFromEntityAssembler;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -30,6 +31,7 @@ public class AuthenticationController {
     }
 
     @PostMapping("/sign-in")
+    @Operation(summary = "Sign In", description = "Authenticates a user and returns a token")
     public ResponseEntity<AuthenticatedUserResource> signIn(@RequestBody SignInResource signInResource) {
         var signInCommand = SignInCommandFromResourceAssembler.toCommandFromResource(signInResource);
         var authenticatedUser = userCommandService.handle(signInCommand);
@@ -41,6 +43,7 @@ public class AuthenticationController {
     }
 
     @PostMapping("/sign-up")
+    @Operation(summary = "Sign Up", description = "Registers a new user in the platform")
     public ResponseEntity<UserResource> signUp(@RequestBody SignUpResource signUpResource) {
         var signUpCommand = SignUpCommandFromResourceAssembler.toCommandFromResource(signUpResource);
         var user = userCommandService.handle(signUpCommand);
@@ -52,6 +55,7 @@ public class AuthenticationController {
     }
 
     @PutMapping("/password")
+    @Operation(summary = "Update Password", description = "Updates the password of the currently authenticated user")
     public ResponseEntity<Void> updatePassword(@RequestBody UpdatePasswordResource resource) {
         var email = SecurityContextHolder.getContext().getAuthentication().getName();
         var command = new UpdatePasswordCommand(email, resource.currentPassword(), resource.newPassword());

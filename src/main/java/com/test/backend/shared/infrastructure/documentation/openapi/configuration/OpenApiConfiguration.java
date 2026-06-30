@@ -29,6 +29,9 @@ public class OpenApiConfiguration {
         // General configuration
         var openApi = new OpenAPI();
 
+        // Security Scheme name
+        final String securitySchemeName = "bearerAuth";
+
         openApi
                 .info(new Info()
                         .title(this.applicationName)
@@ -38,7 +41,15 @@ public class OpenApiConfiguration {
                                 .url("http://springdoc.org")))
                 .externalDocs(new ExternalDocumentation()
                         .description("SafeLab Platform Documentation Wiki")
-                        .url("https://safelab-platform.wiki.github.org/"));
+                        .url("https://safelab-platform.wiki.github.org/"))
+                .addSecurityItem(new SecurityRequirement().addList(securitySchemeName))
+                .components(new Components()
+                        .addSecuritySchemes(securitySchemeName,
+                                new SecurityScheme()
+                                        .name(securitySchemeName)
+                                        .type(SecurityScheme.Type.HTTP)
+                                        .scheme("bearer")
+                                        .bearerFormat("JWT")));
 
         return openApi;
     }
